@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: file:; font-src 'self';">
+  <title>Mi Biblioteca</title>
+  <link rel="stylesheet" href="styles/variables.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/components/sidebar.css">
+  <link rel="stylesheet" href="styles/components/topbar.css">
+  <link rel="stylesheet" href="styles/components/cards.css">
+  <link rel="stylesheet" href="styles/components/forms.css">
+  <link rel="stylesheet" href="styles/components/tables.css">
+  <link rel="stylesheet" href="styles/components/modal.css">
+  <link rel="stylesheet" href="styles/components/toast.css">
+  <link rel="stylesheet" href="styles/components/badges.css">
+  <link rel="stylesheet" href="styles/components/search.css">
+  <link rel="stylesheet" href="styles/components/filters.css">
+  <link rel="stylesheet" href="styles/components/author-selector.css">
+  <link rel="stylesheet" href="styles/components/star-rating.css">
+  <link rel="stylesheet" href="styles/components/charts.css">
+</head>
+<body>
+  <div id="app">
+    <nav id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <h1 class="sidebar-title">
+          <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+          Mi Biblioteca
+        </h1>
+      </div>
+      <ul class="sidebar-nav" id="sidebar-nav">
+        <!-- Populated by app.js -->
+      </ul>
+      <div class="sidebar-footer">
+        <button id="theme-toggle" class="sidebar-btn" title="Cambiar tema">
+          <svg id="theme-icon-light" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg id="theme-icon-dark" class="icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <span>Cambiar tema</span>
+        </button>
+      </div>
+    </nav>
+
+    <main id="main-content" class="main-content">
+      <header id="topbar" class="topbar">
+        <div class="topbar-left">
+          <button id="sidebar-toggle" class="icon-btn" title="Menú">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <h2 id="page-title" class="page-title">Dashboard</h2>
+        </div>
+        <div class="topbar-right">
+          <div id="global-search" class="global-search">
+            <svg class="icon search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="search-input" placeholder="Buscar libros, autores..." autocomplete="off">
+            <div id="search-results" class="search-results hidden"></div>
+          </div>
+        </div>
+      </header>
+
+      <div id="view-container" class="view-container">
+        <!-- Views loaded dynamically -->
+      </div>
+    </main>
+  </div>
+
+  <div id="modal-container" class="modal-overlay hidden">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <h3 id="modal-title"></h3>
+        <button id="modal-close" class="icon-btn">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div id="modal-body" class="modal-body"></div>
+      <div id="modal-footer" class="modal-footer hidden"></div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="scripts/store.js"></script>
+  <script src="scripts/router.js"></script>
+  <script src="scripts/components/toast.js"></script>
+  <script src="scripts/components/modal.js"></script>
+  <script src="scripts/components/search-bar.js"></script>
+  <script src="scripts/components/star-rating.js"></script>
+  <script src="scripts/components/author-selector.js"></script>
+  <script src="scripts/components/book-list.js"></script>
+  <script src="scripts/components/book-form.js"></script>
+  <script src="scripts/components/author-form.js"></script>
+  <script src="scripts/components/loan-manager.js"></script>
+  <script src="scripts/components/user-form.js"></script>
+  <script src="scripts/components/reading-tracker.js"></script>
+  <script src="scripts/components/chart.js"></script>
+  <script src="scripts/components/collection-manager.js"></script>
+  <script src="scripts/app.js"></script>
+</body>
+</html>

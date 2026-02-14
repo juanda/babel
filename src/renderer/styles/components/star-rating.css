@@ -1,0 +1,49 @@
+.star-rating {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.star-rating .star {
+  cursor: pointer;
+  color: var(--color-border);
+  transition: color var(--transition-fast);
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+}
+
+.star-rating .star:hover,
+.star-rating .star.active {
+  color: var(--color-warning);
+}
+
+.star-rating .star svg {
+  width: 20px;
+  height: 20px;
+}
+
+.star-rating.readonly .star {
+  cursor: default;
+}
+
+.star-rating.sm .star svg {
+  width: 14px;
+  height: 14px;
+}
+
+.star-rating.lg .star svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* Star display (non-interactive) */
+.stars-display {
+  display: inline-flex;
+  gap: 1px;
+  color: var(--color-warning);
+}
+
+.stars-display .star-empty {
+  color: var(--color-border);
+}

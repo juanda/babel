@@ -1,0 +1,9 @@
+[install]
+auto = "auto"
+production = false
+
+[run]
+shell = "bash"
+
+[test]
+preload = ["./tests/setup.js"]

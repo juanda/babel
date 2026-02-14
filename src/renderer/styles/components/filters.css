@@ -1,0 +1,117 @@
+.filters-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.filter-select {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-xs);
+  font-family: inherit;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 28px;
+  cursor: pointer;
+}
+
+.filter-select:focus {
+  border-color: var(--color-primary);
+}
+
+.filter-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.active-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+}
+
+.filter-chip-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-primary);
+  display: flex;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.clear-filters {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  font-family: inherit;
+}
+
+.clear-filters:hover {
+  color: var(--color-text);
+}
+
+/* View toggle */
+.view-toggle {
+  display: flex;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.view-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 32px;
+  border: none;
+  background-color: var(--color-bg);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.view-toggle-btn:not(:last-child) {
+  border-right: 1px solid var(--color-border);
+}
+
+.view-toggle-btn:hover {
+  color: var(--color-text);
+}
+
+.view-toggle-btn.active {
+  background-color: var(--color-primary);
+  color: #fff;
+}

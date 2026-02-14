@@ -1,0 +1,144 @@
+.chart-container {
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+
+.chart-title {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+}
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+/* Bar chart */
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.bar-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.bar-label {
+  width: 120px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-align: right;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bar-track {
+  flex: 1;
+  height: 24px;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: var(--radius-sm);
+  transition: width var(--transition-slow);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  color: #fff;
+  font-weight: 500;
+  min-width: fit-content;
+}
+
+.bar-value {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  width: 40px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Pie chart (SVG) */
+.pie-chart-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xl);
+}
+
+.pie-chart svg {
+  width: 180px;
+  height: 180px;
+}
+
+.pie-legend {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.pie-legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-xs);
+}
+
+.pie-legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.pie-legend-label {
+  color: var(--color-text-secondary);
+}
+
+.pie-legend-value {
+  font-weight: 600;
+  margin-left: auto;
+}
+
+/* Line chart */
+.line-chart svg {
+  width: 100%;
+  height: 200px;
+}
+
+.line-chart .axis-line {
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+
+.line-chart .data-line {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2;
+}
+
+.line-chart .data-point {
+  fill: var(--color-primary);
+}
+
+.line-chart .axis-label {
+  font-size: 10px;
+  fill: var(--color-text-muted);
+}
+
+.line-chart .grid-line {
+  stroke: var(--color-border-light);
+  stroke-width: 1;
+  stroke-dasharray: 4;
+}

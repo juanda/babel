@@ -1,0 +1,114 @@
+.sidebar {
+  width: var(--sidebar-width);
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: width var(--transition-base), transform var(--transition-base);
+  overflow: hidden;
+  z-index: 100;
+}
+
+.sidebar.collapsed {
+  width: var(--sidebar-collapsed-width);
+  transform: translateX(calc(-1 * var(--sidebar-width)));
+}
+
+.sidebar-header {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  white-space: nowrap;
+}
+
+.sidebar-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--color-primary);
+}
+
+.sidebar-nav {
+  list-style: none;
+  padding: var(--spacing-sm);
+  flex: 1;
+  overflow-y: auto;
+}
+
+.sidebar-nav li {
+  margin-bottom: 2px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  color: var(--sidebar-text);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.nav-link:hover {
+  background-color: var(--sidebar-hover);
+  text-decoration: none;
+}
+
+.nav-link.active {
+  background-color: var(--sidebar-active);
+  color: #fff;
+}
+
+.nav-separator {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.1);
+  margin: var(--spacing-sm) var(--spacing-md);
+}
+
+.nav-label {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.4);
+  padding: var(--spacing-md) var(--spacing-md) var(--spacing-xs);
+}
+
+.sidebar-footer {
+  padding: var(--spacing-sm);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  color: var(--sidebar-text);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+}
+
+.sidebar-btn:hover {
+  background-color: var(--sidebar-hover);
+}
