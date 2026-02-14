@@ -21,6 +21,15 @@ function normalizeLanguage(lang) {
   return 'other';
 }
 
+function toSecureImageUrl(url) {
+  if (!url) return null;
+  const raw = String(url).trim();
+  if (!raw) return null;
+  if (raw.startsWith('https://')) return raw;
+  if (raw.startsWith('http://')) return `https://${raw.slice('http://'.length)}`;
+  return raw;
+}
+
 function pickIsbn(candidates = []) {
   if (!Array.isArray(candidates) || candidates.length === 0) return null;
   const cleaned = candidates
@@ -98,7 +107,7 @@ async function searchGoogleBooks(query, limit = 8) {
       ? info.industryIdentifiers.map((i) => i.identifier)
       : [];
 
-    const cover = info.imageLinks?.thumbnail || info.imageLinks?.smallThumbnail || null;
+    const cover = toSecureImageUrl(info.imageLinks?.thumbnail || info.imageLinks?.smallThumbnail || null);
 
     return {
       source: 'googlebooks',
