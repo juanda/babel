@@ -1,4 +1,5 @@
 const bookService = require('../services/bookService');
+const externalBookService = require('../services/externalBookService');
 const { app } = require('electron');
 const path = require('path');
 const fs = require('fs');
@@ -36,6 +37,13 @@ function register(ipcMain) {
     }
   });
   ipcMain.handle('books:search', async (_e, query) => ok(bookService.search(query)));
+  ipcMain.handle('books:searchExternal', async (_e, query) => {
+    try {
+      return ok(await externalBookService.searchBooks(query));
+    } catch (error) {
+      return fail(error);
+    }
+  });
 
   ipcMain.handle('books:uploadCover', async (_e, filePath) => {
     try {

@@ -41,6 +41,22 @@ Esto ejecuta también `electron-rebuild` vía `postinstall`, necesario para `bet
 bun run dev
 ```
 
+### Búsqueda de libros en internet (Open Library + Google Books)
+
+La app soporta búsqueda/importación de libros desde catálogos externos.
+
+- `Open Library`: se usa por defecto sin configuración extra.
+- `Google Books`: opcional, recomendado para mejor cobertura.
+
+Para habilitar Google Books con tu propia cuota, define `GOOGLE_BOOKS_API_KEY` antes de arrancar la app:
+
+```bash
+export GOOGLE_BOOKS_API_KEY="tu_api_key"
+bun run dev
+```
+
+Sin `GOOGLE_BOOKS_API_KEY`, la integración puede seguir funcionando con límites más restrictivos.
+
 ## Comandos útiles
 
 - Ejecutar tests:

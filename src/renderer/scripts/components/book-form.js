@@ -3,10 +3,12 @@
  */
 const BookForm = (() => {
   let authorSelectorInstance = null;
+  let externalSearchResults = [];
 
   async function render(container, bookId = null) {
     let book = null;
     let bookAuthors = [];
+    externalSearchResults = [];
 
     if (bookId) {
       const result = await window.api.books.getById(bookId);
@@ -20,6 +22,16 @@ const BookForm = (() => {
       <div class="detail-card">
         <h2>${book ? 'Editar Libro' : 'Nuevo Libro'}</h2>
         <form id="book-form" class="mt-lg">
+          <div class="detail-card mb-lg">
+            <h3>Buscar en internet</h3>
+            <p class="text-muted text-sm">Busca por título, autor o ISBN e importa datos automáticamente.</p>
+            <div class="form-inline mt-md">
+              <input type="text" class="form-input" id="external-book-query" placeholder="Ej: Cien años de soledad o 9788497592208">
+              <button type="button" class="btn btn-secondary" id="external-book-search-btn">Buscar</button>
+            </div>
+            <div id="external-book-results" class="mt-md"></div>
+          </div>
+
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Título <span class="required">*</span></label>
@@ -204,7 +216,155 @@ const BookForm = (() => {
     container.querySelector('#book-cover-select').addEventListener('click', async () => {
       await handleSelectCover(container);
     });
+    container.querySelector('#external-book-search-btn').addEventListener('click', async () => {
+      await handleExternalSearch(container);
+    });
+    container.querySelector('#external-book-query').addEventListener('keydown', async (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        await handleExternalSearch(container);
+      }
+    });
     renderCoverPreview(container, book?.cover_url || '');
+  }
+
+  async function handleExternalSearch(container) {
+    const queryInput = container.querySelector('#external-book-query');
+    const resultsEl = container.querySelector('#external-book-results');
+    const query = queryInput.value.trim();
+
+    if (query.length < 2) {
+      Toast.warning('Escribe al menos 2 caracteres para buscar');
+      return;
+    }
+
+    resultsEl.innerHTML = '<span class="text-muted text-sm">Buscando...</span>';
+    const result = await window.api.books.searchExternal(query);
+    if (!result.success) {
+      resultsEl.innerHTML = '<span class="text-muted text-sm">No se pudo consultar catálogos externos.</span>';
+      Toast.error(result.error || 'Error en búsqueda externa');
+      return;
+    }
+
+    externalSearchResults = Array.isArray(result.data) ? result.data : [];
+    if (externalSearchResults.length === 0) {
+      resultsEl.innerHTML = '<span class="text-muted text-sm">Sin resultados.</span>';
+      return;
+    }
+
+    resultsEl.innerHTML = `
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Autor(es)</th>
+              <th>Fuente</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${externalSearchResults
+              .map(
+                (item, index) => `<tr>
+                  <td>
+                    <strong>${escapeHtml(item.title || '-')}</strong>
+                    ${item.publisher || item.publication_date ? `<br><small class="text-muted">${escapeHtml(item.publisher || '-')} · ${escapeHtml(item.publication_date || '-')}</small>` : ''}
+                  </td>
+                  <td>${escapeHtml((item.authors || []).join(', ') || '-')}</td>
+                  <td><span class="badge badge-secondary">${escapeHtml(item.source || 'externo')}</span></td>
+                  <td><button type="button" class="btn btn-sm btn-primary js-import-external-book" data-index="${index}">Usar</button></td>
+                </tr>`
+              )
+              .join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    resultsEl.querySelectorAll('.js-import-external-book').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const selected = externalSearchResults[Number(btn.dataset.index)];
+        if (!selected) return;
+        await applyExternalBook(container, selected);
+      });
+    });
+  }
+
+  async function applyExternalBook(container, externalBook) {
+    setInputValue(container, '#book-title', externalBook.title || '');
+    setInputValue(container, '#book-subtitle', externalBook.subtitle || '');
+    setInputValue(container, '#book-isbn', externalBook.isbn || '');
+    setInputValue(container, '#book-publisher', externalBook.publisher || '');
+    setInputValue(container, '#book-publication-date', externalBook.publication_date || '');
+    setInputValue(container, '#book-pages', externalBook.pages || '');
+    setInputValue(container, '#book-genre', externalBook.genre || '');
+    setInputValue(container, '#book-description', externalBook.description || '');
+    setInputValue(container, '#book-cover-url', externalBook.cover_url || '');
+    setInputValue(container, '#book-tags', '');
+
+    const lang = externalBook.language || 'es';
+    const languageEl = container.querySelector('#book-language');
+    if (languageEl) {
+      const hasLang = Array.from(languageEl.options).some((opt) => opt.value === lang);
+      languageEl.value = hasLang ? lang : 'other';
+    }
+
+    renderCoverPreview(container, externalBook.cover_url || '');
+
+    const normalizedAuthors = await ensureAuthors(externalBook.authors || []);
+    if (authorSelectorInstance && normalizedAuthors.length > 0) {
+      authorSelectorInstance.setAuthors(
+        normalizedAuthors.map((author, index) => ({
+          id: author.id,
+          name: author.name,
+          role: 'author',
+          author_order: index + 1,
+        }))
+      );
+    }
+
+    Toast.success('Datos importados al formulario');
+  }
+
+  async function ensureAuthors(authorNames) {
+    const names = Array.from(new Set(authorNames.map((name) => String(name || '').trim()).filter(Boolean)));
+    const out = [];
+
+    for (const name of names) {
+      let existing = null;
+      const search = await window.api.authors.search(name);
+      if (search.success) {
+        existing = (search.data || []).find((a) => a.name.toLowerCase() === name.toLowerCase()) || null;
+      }
+
+      if (existing) {
+        out.push(existing);
+        continue;
+      }
+
+      const created = await window.api.authors.create({ name });
+      if (created.success && created.data) {
+        out.push(created.data);
+      }
+    }
+
+    return out;
+  }
+
+  function setInputValue(container, selector, value) {
+    const el = container.querySelector(selector);
+    if (!el) return;
+    el.value = value == null ? '' : String(value);
+  }
+
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   function renderCoverPreview(container, coverUrl) {
