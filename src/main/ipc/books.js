@@ -1,4 +1,7 @@
 const bookService = require('../services/bookService');
+const { app } = require('electron');
+const path = require('path');
+const fs = require('fs');
 
 function ok(data) {
   return { success: true, data };
@@ -34,8 +37,34 @@ function register(ipcMain) {
   });
   ipcMain.handle('books:search', async (_e, query) => ok(bookService.search(query)));
 
-  ipcMain.handle('books:uploadCover', async () => {
-    return { success: false, error: 'Carga de portada no implementada todavía' };
+  ipcMain.handle('books:uploadCover', async (_e, filePath) => {
+    try {
+      if (!filePath || typeof filePath !== 'string') {
+        throw new Error('Archivo de portada inválido');
+      }
+
+      const srcPath = path.resolve(filePath);
+      if (!fs.existsSync(srcPath)) {
+        throw new Error('El archivo seleccionado no existe');
+      }
+
+      const ext = path.extname(srcPath).toLowerCase();
+      const allowed = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif']);
+      if (!allowed.has(ext)) {
+        throw new Error('Formato de imagen no soportado');
+      }
+
+      const coversDir = path.join(app.getPath('userData'), 'covers');
+      fs.mkdirSync(coversDir, { recursive: true });
+
+      const fileName = `cover_${Date.now()}_${Math.random().toString(36).slice(2, 10)}${ext}`;
+      const destPath = path.join(coversDir, fileName);
+      fs.copyFileSync(srcPath, destPath);
+
+      return ok(`file://${destPath}`);
+    } catch (error) {
+      return fail(error);
+    }
   });
 }
 

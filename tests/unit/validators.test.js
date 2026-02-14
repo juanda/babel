@@ -28,6 +28,16 @@ describe('validators', () => {
     ).toThrow('URL inválida');
   });
 
+  test('bookSchema acepta file:// como cover_url local', () => {
+    const parsed = parseSchema(bookSchema, {
+      title: 'Libro con portada local',
+      language: 'es',
+      cover_url: 'file:///tmp/cover.jpg',
+    });
+
+    expect(parsed.cover_url).toBe('file:///tmp/cover.jpg');
+  });
+
   test('bookSchema aplica defaults críticos', () => {
     const parsed = parseSchema(bookSchema, {
       title: 'El libro',

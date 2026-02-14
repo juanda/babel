@@ -11,11 +11,21 @@ function getById(id) {
 
 function create(input) {
   const data = parseSchema(authorSchema, input);
+  const params = {
+    name: data.name,
+    biography: data.biography ?? null,
+    birth_date: data.birth_date ?? null,
+    death_date: data.death_date ?? null,
+    nationality: data.nationality ?? null,
+    photo_url: data.photo_url ?? null,
+    website: data.website ?? null,
+    notes: data.notes ?? null,
+  };
   const stmt = db().prepare(`
     INSERT INTO authors (name, biography, birth_date, death_date, nationality, photo_url, website, notes)
     VALUES (@name, @biography, @birth_date, @death_date, @nationality, @photo_url, @website, @notes)
   `);
-  const result = stmt.run(data);
+  const result = stmt.run(params);
   return getById(result.lastInsertRowid);
 }
 

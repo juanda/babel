@@ -166,8 +166,12 @@ const BookForm = (() => {
           </div>
 
           <div class="form-group">
-            <label class="form-label">URL de portada</label>
-            <input type="text" class="form-input" id="book-cover-url" value="${book?.cover_url || ''}" placeholder="https://...">
+            <label class="form-label">Portada</label>
+            <div class="form-inline">
+              <input type="text" class="form-input" id="book-cover-url" value="${book?.cover_url || ''}" readonly placeholder="Sin portada seleccionada">
+              <button type="button" class="btn btn-secondary" id="book-cover-select">Seleccionar imagen</button>
+            </div>
+            <div id="book-cover-preview" class="mt-md"></div>
           </div>
 
           <div class="form-actions">
@@ -197,6 +201,54 @@ const BookForm = (() => {
     container.querySelector('#book-form-cancel').addEventListener('click', () => {
       Router.navigate('books');
     });
+    container.querySelector('#book-cover-select').addEventListener('click', async () => {
+      await handleSelectCover(container);
+    });
+    renderCoverPreview(container, book?.cover_url || '');
+  }
+
+  function renderCoverPreview(container, coverUrl) {
+    const preview = container.querySelector('#book-cover-preview');
+    if (!preview) return;
+
+    if (!coverUrl) {
+      preview.innerHTML = '<span class="text-muted text-sm">No hay portada seleccionada</span>';
+      return;
+    }
+
+    preview.innerHTML = `
+      <img
+        src="${coverUrl}"
+        alt="Vista previa de portada"
+        style="max-width: 140px; max-height: 200px; border-radius: 8px; border: 1px solid var(--color-border); object-fit: cover;"
+      >
+    `;
+  }
+
+  async function handleSelectCover(container) {
+    const selected = await window.api.system.selectFile({
+      filters: [
+        {
+          name: 'Imágenes',
+          extensions: ['jpg', 'jpeg', 'png', 'webp', 'gif'],
+        },
+      ],
+    });
+
+    if (!selected.success) {
+      return;
+    }
+
+    const uploaded = await window.api.books.uploadCover(selected.data);
+    if (!uploaded.success) {
+      Toast.error(uploaded.error || 'No se pudo subir la portada');
+      return;
+    }
+
+    const input = container.querySelector('#book-cover-url');
+    input.value = uploaded.data;
+    renderCoverPreview(container, uploaded.data);
+    Toast.success('Portada cargada');
   }
 
   async function handleSubmit(bookId) {

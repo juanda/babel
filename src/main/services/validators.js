@@ -14,7 +14,7 @@ const dateString = z
 const urlString = z
   .union([z.string(), z.null(), z.undefined()])
   .transform((v) => (typeof v === 'string' ? v.trim() : v))
-  .refine((v) => !v || /^https?:\/\//i.test(v), 'URL inválida')
+  .refine((v) => !v || /^(https?:\/\/|file:\/\/)/i.test(v), 'URL inválida')
   .transform((v) => v || null);
 
 const authorSchema = z.object({
