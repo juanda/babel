@@ -137,6 +137,7 @@
           <h2>${escapeHtml(b.title)}</h2>
           <div>
             <button class="btn btn-secondary" id="book-detail-edit" data-id="${b.id}">Editar</button>
+            <button class="btn btn-danger" id="book-detail-delete" data-id="${b.id}">Eliminar</button>
           </div>
         </div>
         <p class="text-muted">${escapeHtml(b.subtitle || '')}</p>
@@ -149,6 +150,25 @@
     `;
     container.querySelector('#book-detail-edit')?.addEventListener('click', () => {
       Router.navigate('book-form', { id: b.id });
+    });
+    container.querySelector('#book-detail-delete')?.addEventListener('click', async () => {
+      const confirmed = await Modal.confirm({
+        title: 'Eliminar Libro',
+        message: `¿Estás seguro de eliminar "${b.title}"? Esta acción no se puede deshacer.`,
+        confirmText: 'Eliminar',
+        danger: true,
+      });
+      if (!confirmed) return;
+
+      const deleted = await window.api.books.delete(b.id);
+      if (!deleted.success) {
+        Toast.error(deleted.error || 'No se pudo eliminar el libro');
+        return;
+      }
+
+      Toast.success('Libro eliminado');
+      SearchBar.loadData();
+      Router.navigate('books');
     });
 
     ReadingTracker.render(document.getElementById('reading-tracker'), b);
