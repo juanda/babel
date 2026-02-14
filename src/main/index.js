@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const db = require('./database/db');
 const logger = require('./utils/logger');
 
@@ -47,6 +48,43 @@ function registerIpcHandlers() {
       return { success: false, error: 'Selección cancelada' };
     }
     return { success: true, data: result.filePaths[0] };
+  });
+
+  ipcMain.handle('system:getConfig', async () => {
+    try {
+      const configPath = path.join(app.getPath('userData'), 'config.json');
+      if (!fs.existsSync(configPath)) {
+        return { success: true, data: {} };
+      }
+      const parsed = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      return { success: true, data: parsed };
+    } catch (error) {
+      return { success: false, error: error.message || 'No se pudo cargar configuración' };
+    }
+  });
+
+  ipcMain.handle('system:setConfig', async (_event, key, value) => {
+    try {
+      const configPath = path.join(app.getPath('userData'), 'config.json');
+      const current = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, 'utf-8')) : {};
+      current[key] = value;
+      fs.writeFileSync(configPath, JSON.stringify(current, null, 2));
+      return { success: true, data: current };
+    } catch (error) {
+      return { success: false, error: error.message || 'No se pudo guardar configuración' };
+    }
+  });
+
+  ipcMain.handle('system:backup', async () => {
+    return { success: false, error: 'Backup no implementado todavía' };
+  });
+
+  ipcMain.handle('system:restore', async () => {
+    return { success: false, error: 'Restore no implementado todavía' };
+  });
+
+  ipcMain.handle('system:importData', async () => {
+    return { success: false, error: 'Importación no implementada todavía' };
   });
 
   // Load module-specific handlers
