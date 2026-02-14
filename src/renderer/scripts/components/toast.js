@@ -17,10 +17,13 @@ const Toast = (() => {
     toast.innerHTML = `
       ${icons[type] || icons.info}
       <span class="toast-message">${message}</span>
-      <button class="toast-close" onclick="this.parentElement.remove()">
+      <button class="toast-close">
         <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     `;
+    toast.querySelector('.toast-close').addEventListener('click', () => {
+      toast.remove();
+    });
     container().appendChild(toast);
 
     if (duration > 0) {

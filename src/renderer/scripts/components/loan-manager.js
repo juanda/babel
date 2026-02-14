@@ -20,7 +20,7 @@ const LoanManager = (() => {
             <span class="text-secondary text-sm">${activeLoans.length} préstamo${activeLoans.length !== 1 ? 's' : ''} activo${activeLoans.length !== 1 ? 's' : ''}</span>
             ${overdueLoans.length > 0 ? `<span class="badge badge-error ml-sm">${overdueLoans.length} vencido${overdueLoans.length !== 1 ? 's' : ''}</span>` : ''}
           </div>
-          <button class="btn btn-primary" onclick="LoanManager.showCreateModal()">
+          <button class="btn btn-primary" id="loan-new-btn">
             <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Nuevo Préstamo
           </button>
@@ -72,7 +72,7 @@ const LoanManager = (() => {
                 }
               </td>
               <td class="table-actions">
-                <button class="btn btn-sm btn-success" onclick="LoanManager.returnLoan(${loan.id})">Devolver</button>
+                <button class="btn btn-sm btn-success js-loan-return" data-id="${loan.id}">Devolver</button>
               </td>
             </tr>
           `;
@@ -85,12 +85,17 @@ const LoanManager = (() => {
       html += `
         <div class="mt-lg">
           <h3>Historial de Préstamos</h3>
-          <button class="btn btn-secondary btn-sm mt-md" onclick="LoanManager.loadHistory()">Cargar historial</button>
+          <button class="btn btn-secondary btn-sm mt-md" id="loan-load-history">Cargar historial</button>
           <div id="loan-history" class="mt-md"></div>
         </div>
       `;
 
       container.innerHTML = html;
+      container.querySelector('#loan-new-btn')?.addEventListener('click', () => showCreateModal());
+      container.querySelector('#loan-load-history')?.addEventListener('click', () => loadHistory());
+      container.querySelectorAll('.js-loan-return').forEach((btn) => {
+        btn.addEventListener('click', () => returnLoan(Number(btn.dataset.id)));
+      });
     } catch (e) {
       container.innerHTML = '<p class="text-muted">Error al cargar préstamos</p>';
     }
@@ -153,11 +158,12 @@ const LoanManager = (() => {
     const footer = document.createElement('div');
     footer.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;width:100%';
     footer.innerHTML = `
-      <button class="btn btn-secondary" onclick="Modal.close()">Cancelar</button>
+      <button class="btn btn-secondary" id="loan-cancel">Cancelar</button>
       <button class="btn btn-primary" id="loan-submit">Crear préstamo</button>
     `;
 
     Modal.open({ title: 'Nuevo Préstamo', content, footer });
+    document.getElementById('loan-cancel').addEventListener('click', () => Modal.close());
 
     document.getElementById('loan-submit').addEventListener('click', async () => {
       const data = {
@@ -205,11 +211,12 @@ const LoanManager = (() => {
     const footer = document.createElement('div');
     footer.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;width:100%';
     footer.innerHTML = `
-      <button class="btn btn-secondary" onclick="Modal.close()">Cancelar</button>
+      <button class="btn btn-secondary" id="return-cancel">Cancelar</button>
       <button class="btn btn-success" id="return-submit">Confirmar devolución</button>
     `;
 
     Modal.open({ title: 'Devolver Libro', content, footer, size: 'sm' });
+    document.getElementById('return-cancel').addEventListener('click', () => Modal.close());
 
     document.getElementById('return-submit').addEventListener('click', async () => {
       const data = {

@@ -58,7 +58,7 @@ const AuthorForm = (() => {
           </div>
 
           <div class="form-actions">
-            <button type="button" class="btn btn-secondary" onclick="Router.navigate('authors')">Cancelar</button>
+            <button type="button" class="btn btn-secondary" id="author-form-cancel">Cancelar</button>
             <button type="submit" class="btn btn-primary">${author ? 'Guardar cambios' : 'Crear autor'}</button>
           </div>
         </form>
@@ -68,6 +68,9 @@ const AuthorForm = (() => {
     container.querySelector('#author-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       await handleSubmit(authorId);
+    });
+    container.querySelector('#author-form-cancel').addEventListener('click', () => {
+      Router.navigate('authors');
     });
   }
 

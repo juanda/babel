@@ -20,8 +20,8 @@ const CollectionManager = (() => {
                   <td>${c.description || '-'}</td>
                   <td>${c.book_count || 0}</td>
                   <td class="table-actions">
-                    <button class="btn btn-sm btn-secondary" onclick="CollectionManager.edit(${c.id})">Editar</button>
-                    <button class="btn btn-sm btn-danger" onclick="CollectionManager.remove(${c.id})">Eliminar</button>
+                    <button class="btn btn-sm btn-secondary js-collection-edit" data-id="${c.id}">Editar</button>
+                    <button class="btn btn-sm btn-danger js-collection-remove" data-id="${c.id}">Eliminar</button>
                   </td>
                 </tr>`
               )
@@ -32,6 +32,12 @@ const CollectionManager = (() => {
     `;
 
     document.getElementById('collection-new').addEventListener('click', () => openModal());
+    container.querySelectorAll('.js-collection-edit').forEach((btn) => {
+      btn.addEventListener('click', () => edit(Number(btn.dataset.id)));
+    });
+    container.querySelectorAll('.js-collection-remove').forEach((btn) => {
+      btn.addEventListener('click', () => remove(Number(btn.dataset.id)));
+    });
   }
 
   function openModal(collection = null) {
@@ -49,11 +55,12 @@ const CollectionManager = (() => {
     const footer = document.createElement('div');
     footer.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;width:100%';
     footer.innerHTML = `
-      <button class="btn btn-secondary" onclick="Modal.close()">Cancelar</button>
+      <button class="btn btn-secondary" id="collection-cancel">Cancelar</button>
       <button class="btn btn-primary" id="collection-save">Guardar</button>
     `;
 
     Modal.open({ title: collection ? 'Editar colección' : 'Nueva colección', content, footer, size: 'sm' });
+    document.getElementById('collection-cancel').addEventListener('click', () => Modal.close());
 
     document.getElementById('collection-save').addEventListener('click', async () => {
       const payload = {

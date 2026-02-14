@@ -136,7 +136,7 @@
         <div class="view-header">
           <h2>${escapeHtml(b.title)}</h2>
           <div>
-            <button class="btn btn-secondary" onclick="Router.navigate('book-form', { id: ${b.id} })">Editar</button>
+            <button class="btn btn-secondary" id="book-detail-edit" data-id="${b.id}">Editar</button>
           </div>
         </div>
         <p class="text-muted">${escapeHtml(b.subtitle || '')}</p>
@@ -147,6 +147,9 @@
         <div id="reading-tracker" class="mt-lg"></div>
       </div>
     `;
+    container.querySelector('#book-detail-edit')?.addEventListener('click', () => {
+      Router.navigate('book-form', { id: b.id });
+    });
 
     ReadingTracker.render(document.getElementById('reading-tracker'), b);
   }
@@ -160,7 +163,7 @@
     container.innerHTML = `
       <div class="view-header">
         <span class="text-secondary text-sm">${authors.length} autor(es)</span>
-        <button class="btn btn-primary" onclick="Router.navigate('author-form')">Nuevo autor</button>
+        <button class="btn btn-primary" id="authors-new-btn">Nuevo autor</button>
       </div>
       <div class="table-container mt-md">
         <table class="data-table">
@@ -172,8 +175,8 @@
                   <td>${escapeHtml(a.name)}</td>
                   <td>${escapeHtml(a.nationality || '-')}</td>
                   <td class="table-actions">
-                    <button class="btn btn-sm btn-secondary" onclick="Router.navigate('author-detail', { id: ${a.id} })">Ver</button>
-                    <button class="btn btn-sm btn-secondary" onclick="Router.navigate('author-form', { id: ${a.id} })">Editar</button>
+                    <button class="btn btn-sm btn-secondary js-author-view" data-id="${a.id}">Ver</button>
+                    <button class="btn btn-sm btn-secondary js-author-edit" data-id="${a.id}">Editar</button>
                   </td>
                 </tr>`
               )
@@ -182,6 +185,15 @@
         </table>
       </div>
     `;
+    container.querySelector('#authors-new-btn')?.addEventListener('click', () => {
+      Router.navigate('author-form');
+    });
+    container.querySelectorAll('.js-author-view').forEach((btn) => {
+      btn.addEventListener('click', () => Router.navigate('author-detail', { id: Number(btn.dataset.id) }));
+    });
+    container.querySelectorAll('.js-author-edit').forEach((btn) => {
+      btn.addEventListener('click', () => Router.navigate('author-form', { id: Number(btn.dataset.id) }));
+    });
   }
 
   async function renderAuthorDetail(params) {

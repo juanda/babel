@@ -49,11 +49,12 @@ const ReadingTracker = (() => {
     const footer = document.createElement('div');
     footer.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;width:100%';
     footer.innerHTML = `
-      <button class="btn btn-secondary" onclick="Modal.close()">Cancelar</button>
+      <button class="btn btn-secondary" id="reading-finish-cancel">Cancelar</button>
       <button class="btn btn-success" id="reading-finish-submit">Guardar</button>
     `;
 
     Modal.open({ title: 'Finalizar lectura', content, footer, size: 'sm' });
+    document.getElementById('reading-finish-cancel').addEventListener('click', () => Modal.close());
     document.getElementById('reading-finish-submit').addEventListener('click', async () => {
       const ratingRaw = document.getElementById('reading-rating').value;
       const payload = {

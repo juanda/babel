@@ -171,7 +171,7 @@ const BookForm = (() => {
           </div>
 
           <div class="form-actions">
-            <button type="button" class="btn btn-secondary" onclick="Router.navigate('books')">Cancelar</button>
+            <button type="button" class="btn btn-secondary" id="book-form-cancel">Cancelar</button>
             <button type="submit" class="btn btn-primary">${book ? 'Guardar cambios' : 'Crear libro'}</button>
           </div>
         </form>
@@ -193,6 +193,9 @@ const BookForm = (() => {
     container.querySelector('#book-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       await handleSubmit(bookId);
+    });
+    container.querySelector('#book-form-cancel').addEventListener('click', () => {
+      Router.navigate('books');
     });
   }
 

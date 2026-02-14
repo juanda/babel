@@ -83,7 +83,7 @@ const SearchBar = (() => {
       resultsEl.innerHTML = results
         .map(
           (r) => `
-        <div class="search-result-item" onclick="Router.navigate('${r.route}', {id: ${r.id}}); document.getElementById('search-results').classList.add('hidden'); document.getElementById('search-input').value = '';">
+        <div class="search-result-item js-search-result" data-route="${r.route}" data-id="${r.id}">
           <span class="search-result-type">${r.type}</span>
           <div>
             <div class="search-result-title">${r.title}</div>
@@ -93,6 +93,14 @@ const SearchBar = (() => {
         )
         .join('');
     }
+
+    resultsEl.querySelectorAll('.js-search-result').forEach((item) => {
+      item.addEventListener('click', () => {
+        Router.navigate(item.dataset.route, { id: Number(item.dataset.id) });
+        document.getElementById('search-results').classList.add('hidden');
+        document.getElementById('search-input').value = '';
+      });
+    });
     resultsEl.classList.remove('hidden');
   }
 

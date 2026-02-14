@@ -38,14 +38,14 @@ const BookList = (() => {
         </div>
         <div class="view-actions">
           <div class="view-toggle">
-            <button class="view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}" onclick="BookList.setViewMode('grid')" title="Vista cuadrícula">
+            <button class="view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}" data-action="set-view" data-mode="grid" title="Vista cuadrícula">
               <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
             </button>
-            <button class="view-toggle-btn ${viewMode === 'table' ? 'active' : ''}" onclick="BookList.setViewMode('table')" title="Vista tabla">
+            <button class="view-toggle-btn ${viewMode === 'table' ? 'active' : ''}" data-action="set-view" data-mode="table" title="Vista tabla">
               <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
             </button>
           </div>
-          <button class="btn btn-primary" onclick="Router.navigate('book-form')">
+          <button class="btn btn-primary" data-action="go-new-book">
             <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Agregar Libro
           </button>
@@ -58,7 +58,7 @@ const BookList = (() => {
         <div class="empty-state">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
           <p>No hay libros en tu biblioteca</p>
-          <button class="btn btn-primary" onclick="Router.navigate('book-form')">Agregar tu primer libro</button>
+          <button class="btn btn-primary" data-action="go-new-book">Agregar tu primer libro</button>
         </div>
       `;
     } else if (viewMode === 'grid') {
@@ -76,6 +76,7 @@ const BookList = (() => {
     }
 
     container.innerHTML = html;
+    attachHandlers(container);
   }
 
   function renderBookCard(book) {
@@ -86,7 +87,7 @@ const BookList = (() => {
     const statusBadge = getStatusBadge(book.read_status);
 
     return `
-      <div class="book-card" onclick="Router.navigate('book-detail', {id: ${book.id}})">
+      <div class="book-card js-open-book" data-id="${book.id}">
         <div class="book-card-cover">
           ${coverHtml}
           ${statusBadge ? `<span class="book-card-badge">${statusBadge}</span>` : ''}
@@ -122,17 +123,17 @@ const BookList = (() => {
 
     books.forEach((book) => {
       html += `
-        <tr class="clickable-row" onclick="Router.navigate('book-detail', {id: ${book.id}})">
+        <tr class="clickable-row js-open-book" data-id="${book.id}">
           <td><strong>${book.title}</strong>${book.subtitle ? `<br><small class="text-muted">${book.subtitle}</small>` : ''}</td>
           <td>${book.authors || 'Sin autor'}</td>
           <td>${book.genre || '-'}</td>
           <td>${getStatusBadge(book.read_status)}</td>
           <td>${book.rating ? StarRating.display(book.rating) : '-'}</td>
-          <td class="table-actions" onclick="event.stopPropagation()">
-            <button class="icon-btn" onclick="Router.navigate('book-form', {id: ${book.id}})" title="Editar">
+          <td class="table-actions">
+            <button class="icon-btn js-edit-book" data-id="${book.id}" title="Editar">
               <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
-            <button class="icon-btn" onclick="BookList.deleteBook(${book.id}, '${book.title.replace(/'/g, "\\'")}')" title="Eliminar">
+            <button class="icon-btn js-delete-book" data-id="${book.id}" title="Eliminar">
               <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
             </button>
           </td>
@@ -155,11 +156,49 @@ const BookList = (() => {
 
   function renderPagination(totalPages) {
     let html = '<div class="pagination">';
-    html += `<button class="btn btn-sm btn-secondary" ${currentPage <= 1 ? 'disabled' : ''} onclick="BookList.goToPage(${currentPage - 1})">Anterior</button>`;
+    html += `<button class="btn btn-sm btn-secondary" ${currentPage <= 1 ? 'disabled' : ''} data-action="go-page" data-page="${currentPage - 1}">Anterior</button>`;
     html += `<span class="pagination-info">Página ${currentPage} de ${totalPages}</span>`;
-    html += `<button class="btn btn-sm btn-secondary" ${currentPage >= totalPages ? 'disabled' : ''} onclick="BookList.goToPage(${currentPage + 1})">Siguiente</button>`;
+    html += `<button class="btn btn-sm btn-secondary" ${currentPage >= totalPages ? 'disabled' : ''} data-action="go-page" data-page="${currentPage + 1}">Siguiente</button>`;
     html += '</div>';
     return html;
+  }
+
+  function attachHandlers(container) {
+    container.querySelectorAll('[data-action="set-view"]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        setViewMode(btn.dataset.mode);
+      });
+    });
+
+    container.querySelectorAll('[data-action="go-new-book"]').forEach((btn) => {
+      btn.addEventListener('click', () => Router.navigate('book-form'));
+    });
+
+    container.querySelectorAll('.js-open-book').forEach((el) => {
+      el.addEventListener('click', () => {
+        Router.navigate('book-detail', { id: Number(el.dataset.id) });
+      });
+    });
+
+    container.querySelectorAll('.js-edit-book').forEach((btn) => {
+      btn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        Router.navigate('book-form', { id: Number(btn.dataset.id) });
+      });
+    });
+
+    container.querySelectorAll('.js-delete-book').forEach((btn) => {
+      btn.addEventListener('click', async (event) => {
+        event.stopPropagation();
+        const id = Number(btn.dataset.id);
+        const book = currentBooks.find((b) => b.id === id);
+        await deleteBook(id, book?.title || 'este libro');
+      });
+    });
+
+    container.querySelectorAll('[data-action="go-page"]').forEach((btn) => {
+      btn.addEventListener('click', () => goToPage(Number(btn.dataset.page)));
+    });
   }
 
   function goToPage(page) {

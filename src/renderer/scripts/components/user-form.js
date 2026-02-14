@@ -12,7 +12,7 @@ const UserForm = (() => {
       let html = `
         <div class="view-header">
           <span class="text-secondary text-sm">${users.length} usuario${users.length !== 1 ? 's' : ''}</span>
-          <button class="btn btn-primary" onclick="UserForm.showModal()">
+          <button class="btn btn-primary" id="users-new-btn">
             <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Nuevo Usuario
           </button>
@@ -42,10 +42,10 @@ const UserForm = (() => {
               <td>${StarRating.display(u.trust_level)}</td>
               <td>${u.active ? '<span class="badge badge-success">Activo</span>' : '<span class="badge badge-secondary">Inactivo</span>'}</td>
               <td class="table-actions">
-                <button class="icon-btn" onclick="UserForm.showModal(${u.id})" title="Editar">
+                <button class="icon-btn js-user-edit" data-id="${u.id}" title="Editar">
                   <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 </button>
-                <button class="icon-btn" onclick="UserForm.deleteUser(${u.id}, '${u.name.replace(/'/g, "\\'")}')" title="Eliminar">
+                <button class="icon-btn js-user-delete" data-id="${u.id}" title="Eliminar">
                   <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 </button>
               </td>
@@ -56,6 +56,24 @@ const UserForm = (() => {
       }
 
       container.innerHTML = html;
+      const newBtn = container.querySelector('#users-new-btn');
+      if (newBtn) {
+        newBtn.addEventListener('click', () => showModal());
+      }
+
+      container.querySelectorAll('.js-user-edit').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          showModal(Number(btn.dataset.id));
+        });
+      });
+
+      container.querySelectorAll('.js-user-delete').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = Number(btn.dataset.id);
+          const user = users.find((u) => u.id === id);
+          deleteUser(id, user?.name || 'este usuario');
+        });
+      });
     } catch (e) {
       container.innerHTML = '<p class="text-muted">Error al cargar usuarios</p>';
     }
@@ -112,11 +130,12 @@ const UserForm = (() => {
     const footer = document.createElement('div');
     footer.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;width:100%';
     footer.innerHTML = `
-      <button class="btn btn-secondary" onclick="Modal.close()">Cancelar</button>
+      <button class="btn btn-secondary" id="user-cancel">Cancelar</button>
       <button class="btn btn-primary" id="user-submit">${user ? 'Guardar' : 'Crear'}</button>
     `;
 
     Modal.open({ title: user ? 'Editar Usuario' : 'Nuevo Usuario', content, footer });
+    document.getElementById('user-cancel').addEventListener('click', () => Modal.close());
 
     document.getElementById('user-submit').addEventListener('click', async () => {
       const data = {
