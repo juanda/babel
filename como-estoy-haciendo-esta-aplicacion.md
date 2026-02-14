@@ -1,5 +1,7 @@
 # Cómo estoy haciendo esta aplicación
 
+Comencé la aplicación a las 18:00 del sábado, 14/02/2026.
+
 He comenzado por preguntar a claude web:
 
 ```
@@ -8,4 +10,19 @@ Quiero construir un software para la gestión de mi biblioteca de libros físico
 
 Claude me ha presentado una propuesta. La he revisado. Lo único que he cambiad ha sido una parte del modelo de datos: claude había metido a los autores como un campo json dentro de libros, pero yo quiero que los autores tengan su tabla propia. Se lo he dicho y ha modificado el documento de especificaciones. Finalmente el punto de partida para claude code será [biblioteca-specs](biblioteca-specs.md)
 
-He instalado en claude el plugin 
+Al cabo de unos 30-40 minutos me he quedado sin tokens en la ventana de 5 horas. Por eso he continuado con codex. Le he dicho:
+
+```
+este directorio contiene el código de la aplicación de biblioteca
+    especificada en biblioteca-specs.md. Claude a iniciado la
+    implementación siguiendo el plan /home/juanda/.claude/plans/
+    golden-snuggling-engelbart.md, continúa tu la implementación. A
+  ver si lo haces mejor que claude ;-)
+```
+
+Y ha continuado el desarrollo. Ha llegado a un esqueleto básico en el que todavía no funcionan los formularios de entrada de datos. 
+
+El siguiente paso, sugerido por codex, ha sido implementar tests. Y así he continuado.
+
+son las 19:35 y tengo una aplicación funcional lista para probar y refinar.
+
