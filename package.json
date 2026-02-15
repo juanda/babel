@@ -15,7 +15,10 @@
     "postinstall": "electron-rebuild"
   },
   "keywords": ["library", "books", "management", "electron"],
-  "author": "juanda",
+  "author": {
+    "name": "Juan David Rodríguez García",
+    "email": "juanda@juandarodriguez.es"
+  },
   "license": "MIT",
   "devDependencies": {
     "@electron/rebuild": "^3.6.0",
@@ -56,7 +59,8 @@
     "linux": {
       "target": ["AppImage", "deb"],
       "icon": "assets/icons/icon.png",
-      "category": "Utility"
+      "category": "Utility",
+      "maintainer": "Juan David Rodríguez García <juanda@juandarodriguez.es>"
     },
     "asarUnpack": [
       "node_modules/better-sqlite3/**"
