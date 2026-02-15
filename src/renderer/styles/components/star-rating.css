@@ -6,9 +6,8 @@
 .star-rating .star {
   cursor: pointer;
   color: var(--color-border);
-  transition: color var(--transition-fast);
-  background: none;
-  border: none;
+  background: var(--color-bg);
+  border: 2px solid transparent;
   padding: 0;
   display: flex;
 }
@@ -16,6 +15,7 @@
 .star-rating .star:hover,
 .star-rating .star.active {
   color: var(--color-warning);
+  border-color: var(--color-warning);
 }
 
 .star-rating .star svg {
@@ -37,7 +37,6 @@
   height: 28px;
 }
 
-/* Star display (non-interactive) */
 .stars-display {
   display: inline-flex;
   gap: 1px;

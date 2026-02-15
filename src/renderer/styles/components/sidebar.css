@@ -8,6 +8,7 @@
   transition: width var(--transition-base), transform var(--transition-base);
   overflow: hidden;
   z-index: 100;
+  border-right: 3px solid var(--color-border);
 }
 
 .sidebar.collapsed {
@@ -17,16 +18,24 @@
 
 .sidebar-header {
   padding: var(--spacing-lg);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 3px solid var(--color-border);
+  background: repeating-linear-gradient(
+    -45deg,
+    #000,
+    #000 8px,
+    #151515 8px,
+    #151515 16px
+  );
 }
 
 .sidebar-title {
   font-size: var(--font-size-lg);
-  font-weight: 700;
+  font-weight: 900;
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
   white-space: nowrap;
+  text-transform: uppercase;
 }
 
 .sidebar-icon {
@@ -43,7 +52,7 @@
 }
 
 .sidebar-nav li {
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .nav-link {
@@ -51,46 +60,51 @@
   align-items: center;
   gap: var(--spacing-sm);
   padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-md);
   color: var(--sidebar-text);
   text-decoration: none;
   font-size: var(--font-size-sm);
   transition: all var(--transition-fast);
   cursor: pointer;
-  border: none;
+  border: 2px solid transparent;
   background: none;
   width: 100%;
   font-family: inherit;
   white-space: nowrap;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
 .nav-link:hover {
   background-color: var(--sidebar-hover);
+  border-color: var(--color-border);
   text-decoration: none;
 }
 
 .nav-link.active {
   background-color: var(--sidebar-active);
   color: #fff;
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-sm);
 }
 
 .nav-separator {
-  height: 1px;
-  background-color: rgba(255, 255, 255, 0.1);
+  height: 3px;
+  background-color: var(--color-border);
   margin: var(--spacing-sm) var(--spacing-md);
 }
 
 .nav-label {
   font-size: var(--font-size-xs);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.7);
   padding: var(--spacing-md) var(--spacing-md) var(--spacing-xs);
+  font-weight: 900;
 }
 
 .sidebar-footer {
   padding: var(--spacing-sm);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 3px solid var(--color-border);
 }
 
 .sidebar-btn {
@@ -98,17 +112,19 @@
   align-items: center;
   gap: var(--spacing-sm);
   padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-md);
   color: var(--sidebar-text);
   font-size: var(--font-size-sm);
   cursor: pointer;
-  border: none;
+  border: 2px solid transparent;
   background: none;
   width: 100%;
   transition: all var(--transition-fast);
   font-family: inherit;
+  text-transform: uppercase;
+  font-weight: 900;
 }
 
 .sidebar-btn:hover {
   background-color: var(--sidebar-hover);
+  border-color: var(--color-border);
 }

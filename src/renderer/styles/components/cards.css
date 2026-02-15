@@ -1,49 +1,50 @@
 .card {
-  background-color: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-border);
   overflow: hidden;
-  transition: box-shadow var(--transition-fast);
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+  box-shadow: var(--shadow-sm);
 }
 
 .card:hover {
   box-shadow: var(--shadow-md);
+  transform: translate(-1px, -1px);
 }
 
 .card-body {
   padding: var(--spacing-md);
 }
 
-/* Book Cards Grid */
 .book-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: var(--spacing-lg);
 }
 
 .book-card {
-  background-color: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-border);
   overflow: hidden;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: var(--shadow-sm);
 }
 
 .book-card:hover {
   box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+  transform: translate(-2px, -2px);
 }
 
 .book-card-cover {
   width: 100%;
   height: 260px;
-  background-color: var(--color-surface);
+  background-color: var(--color-bg);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   position: relative;
+  border-bottom: 2px solid var(--color-border);
 }
 
 .book-card-cover img {
@@ -77,12 +78,13 @@
 
 .book-card-title {
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: 900;
   margin-bottom: var(--spacing-xs);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-transform: uppercase;
 }
 
 .book-card-author {
@@ -97,36 +99,41 @@
   justify-content: space-between;
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
+  font-weight: 900;
 }
 
 .book-card-rating {
   color: var(--color-warning);
 }
 
-/* Stat Cards */
-.stat-grid {
+.stat-grid,
+.stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-xl);
 }
 
 .stat-card {
-  background-color: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-border);
   padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 .stat-card-label {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   margin-bottom: var(--spacing-xs);
+  text-transform: uppercase;
+  font-weight: 900;
 }
 
-.stat-card-value {
+.stat-card-value,
+.stat-value {
   font-size: var(--font-size-3xl);
-  font-weight: 700;
+  font-weight: 900;
+  line-height: 1;
 }
 
 .stat-card-change {
@@ -134,12 +141,11 @@
   margin-top: var(--spacing-xs);
 }
 
-/* Detail Card */
 .detail-card {
-  background-color: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-border);
   padding: var(--spacing-xl);
+  box-shadow: var(--shadow-md);
 }
 
 .detail-header {
@@ -152,12 +158,12 @@
   width: 200px;
   height: 300px;
   flex-shrink: 0;
-  border-radius: var(--radius-md);
   overflow: hidden;
-  background-color: var(--color-surface);
+  background-color: var(--color-bg);
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 2px solid var(--color-border);
 }
 
 .detail-cover img {
@@ -174,6 +180,7 @@
 .detail-title {
   font-size: var(--font-size-2xl);
   margin-bottom: var(--spacing-xs);
+  text-transform: uppercase;
 }
 
 .detail-subtitle {
@@ -197,7 +204,8 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
+  font-weight: 900;
 }
 
 .detail-field-value {

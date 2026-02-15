@@ -2,77 +2,86 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
+  padding: 4px 10px;
+  border: 2px solid var(--color-border-strong);
+  border-radius: 0;
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   white-space: nowrap;
+  box-shadow: var(--shadow-sm);
 }
 
 .badge-primary {
-  background-color: var(--color-primary-light);
-  color: var(--color-primary);
+  background-color: var(--color-primary);
+  color: var(--color-bg);
 }
 
 .badge-success {
-  background-color: var(--color-success-light);
-  color: var(--color-success);
+  background-color: var(--color-success);
+  color: var(--color-bg);
 }
 
 .badge-warning {
-  background-color: var(--color-warning-light);
-  color: var(--color-warning);
+  background-color: var(--color-warning);
+  color: var(--color-bg);
 }
 
 .badge-error {
-  background-color: var(--color-error-light);
-  color: var(--color-error);
+  background-color: var(--color-error);
+  color: var(--color-bg);
 }
 
 .badge-secondary {
   background-color: var(--color-surface);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
+  color: var(--color-text);
 }
 
-/* Tag chips */
 .tag {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 4px 10px;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
+  background-color: var(--color-bg);
+  border: 2px solid var(--color-border-strong);
+  border-radius: 0;
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  font-weight: 700;
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
 }
 
 .tag-remove {
-  background: none;
-  border: none;
+  background: var(--color-bg);
+  border: 2px solid var(--color-border-strong);
   cursor: pointer;
   color: var(--color-text-muted);
   display: flex;
   padding: 0;
+  width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
 }
 
 .tag-remove:hover {
   color: var(--color-error);
+  border-color: var(--color-error);
 }
 
-/* Favorite star */
 .favorite-btn {
-  background: none;
-  border: none;
+  background: var(--color-bg);
+  border: 2px solid var(--color-border-strong);
   cursor: pointer;
   color: var(--color-text-muted);
   display: flex;
   padding: 2px;
-  transition: color var(--transition-fast);
+  box-shadow: var(--shadow-sm);
 }
 
 .favorite-btn:hover,
 .favorite-btn.active {
   color: var(--color-warning);
+  border-color: var(--color-warning);
 }
