@@ -451,6 +451,12 @@ const BookForm = (() => {
     if (!importedIsbn) {
       Toast.warning('El resultado no incluye ISBN en la fuente seleccionada');
     }
+
+    const resultsEl = container.querySelector('#external-book-results');
+    if (resultsEl) {
+      resultsEl.innerHTML = '';
+    }
+
     Toast.success('Datos importados al formulario');
   }
 
