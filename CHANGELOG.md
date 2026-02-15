@@ -4,6 +4,29 @@ Todos los cambios relevantes de este proyecto se documentan en este archivo.
 
 El formato está inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
+## [v1.0.0] - 2026-02-15
+
+### Added
+- Generación de signatura CDU en el formulario de libros, con sugerencia automática y edición manual.
+- Persistencia de `CDU` y `signatura` en libros (modelo, validación y base de datos).
+- Estado de impresión de tejuelo por libro (`label_printed`) con checkbox editable en crear/editar.
+- Flujo completo de impresión de tejuelos:
+  - Botón en listado de libros.
+  - Pantalla dedicada de configuración.
+  - Plantillas 65/24/21 etiquetas por hoja.
+  - Salida a PDF o envío directo a impresora.
+  - Inclusión de QR local con la signatura.
+
+### Changed
+- El filtro de libros pasó de `Tejuelo impreso` a `Tejuelo no impreso`.
+- La impresión de tejuelos ahora toma todos los libros del resultado actual (sin selección manual por checks).
+- README ampliado con explicación del cálculo de CDU/signatura.
+
+### Fixed
+- Al cambiar entre vista cards/lista en libros ya no desaparecen los filtros/buscador.
+- Alineación de la columna de acciones en la vista tabla de libros.
+- En importación desde búsqueda externa, al pulsar `Usar` se oculta el listado de resultados para continuar más fluido.
+
 ## [v1.0.0-beta3] - 2026-02-15
 
 ### Changed
@@ -51,6 +74,8 @@ El formato está inspirado en [Keep a Changelog](https://keepachangelog.com/es-E
 - Visualización de autores en modal de detalle de colecciones.
 - Indicador de estado de préstamo en cards/listado y detalle de libro.
 
-[unreleased]: https://github.com/juanda/babel/compare/v1.0.0-beta2...HEAD
+[unreleased]: https://github.com/juanda/babel/compare/v1.0.0...HEAD
+[v1.0.0]: https://github.com/juanda/babel/compare/v1.0.0-beta3...v1.0.0
+[v1.0.0-beta3]: https://github.com/juanda/babel/compare/v1.0.0-beta2...v1.0.0-beta3
 [v1.0.0-beta2]: https://github.com/juanda/babel/compare/v1.0.0-beta1...v1.0.0-beta2
 [v1.0.0-beta1]: https://github.com/juanda/babel/releases/tag/v1.0.0-beta1

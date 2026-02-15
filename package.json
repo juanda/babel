@@ -1,6 +1,6 @@
 {
   "name": "biblioteca-app",
-  "version": "1.0.0-beta3",
+  "version": "1.0.0",
   "description": "Sistema de gestión de biblioteca personal",
   "main": "src/main/index.js",
   "scripts": {
