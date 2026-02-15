@@ -5,6 +5,7 @@ const db = require('./database/db');
 const logger = require('./utils/logger');
 
 let mainWindow = null;
+const appWindowTitle = `Mi Biblioteca v${app.getVersion()}`;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -12,7 +13,7 @@ function createWindow() {
     height: 800,
     minWidth: 900,
     minHeight: 600,
-    title: 'Mi Biblioteca',
+    title: appWindowTitle,
     webPreferences: {
       preload: path.join(__dirname, '..', 'preload', 'preload.js'),
       contextIsolation: true,
@@ -22,6 +23,15 @@ function createWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
+
+  // Fuerza título con versión y evita que <title> del renderer lo sobrescriba.
+  mainWindow.webContents.on('page-title-updated', (event) => {
+    event.preventDefault();
+    mainWindow?.setTitle(appWindowTitle);
+  });
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow?.setTitle(appWindowTitle);
+  });
 
   if (process.env.NODE_ENV === 'development') {
     mainWindow.webContents.openDevTools();
