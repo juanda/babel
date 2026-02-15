@@ -1,5 +1,6 @@
 const GOOGLE_BOOKS_API_BASE = 'https://www.googleapis.com/books/v1/volumes';
 const OPEN_LIBRARY_SEARCH_BASE = 'https://openlibrary.org/search.json';
+const bneBookService = require('./bneBookService');
 
 function normalizeDate(value) {
   if (!value) return null;
@@ -292,6 +293,34 @@ function postFilterResults(items, query, options = {}) {
   });
 }
 
+function rankResults(items, query, options = {}) {
+  const q = String(query || '').trim();
+  const isbn = cleanIsbn(q);
+  const titleNorm = normalizeText(q);
+  const exact = !!options.exact;
+
+  function score(item) {
+    let s = 0;
+    const itemIsbn = cleanIsbn(item.isbn);
+    const itemTitle = normalizeText(item.title);
+
+    if (isbn && itemIsbn && itemIsbn === isbn) s += 1000;
+    if (exact && itemTitle === titleNorm) s += 300;
+    if (!exact && itemTitle.includes(titleNorm)) s += 80;
+
+    if (item.source === 'bne') s += 60;
+    if (item.source === 'googlebooks') s += 40;
+    if (item.source === 'openlibrary') s += 30;
+
+    if (item.cover_url) s += 10;
+    if (item.publisher) s += 5;
+
+    return s;
+  }
+
+  return [...items].sort((a, b) => score(b) - score(a));
+}
+
 async function searchBooks(query, options = {}) {
   const q = String(query || '').trim();
   const mode = options.mode || 'general';
@@ -301,10 +330,16 @@ async function searchBooks(query, options = {}) {
     return [];
   }
 
-  const settled = await Promise.allSettled([
+  const includeBne = options.useBne !== false;
+  const providers = [
     searchOpenLibrary(q, options, 100),
     searchGoogleBooks(q, options, 40),
-  ]);
+  ];
+  if (includeBne) {
+    providers.push(bneBookService.searchBooks(q, options, 100));
+  }
+
+  const settled = await Promise.allSettled(providers);
 
   const merged = [];
   for (const result of settled) {
@@ -313,7 +348,7 @@ async function searchBooks(query, options = {}) {
     }
   }
 
-  const filtered = postFilterResults(merged, q, options);
+  const filtered = rankResults(postFilterResults(merged, q, options), q, options);
   if (options.includeVariants) {
     return filtered;
   }

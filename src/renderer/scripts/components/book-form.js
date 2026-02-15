@@ -77,6 +77,10 @@ const BookForm = (() => {
                   <input type="checkbox" id="external-include-variants">
                   Mostrar variantes/ediciones
                 </label>
+                <label class="form-checkbox">
+                  <input type="checkbox" id="external-use-bne" checked>
+                  Incluir BNE
+                </label>
               </div>
             </div>
             <div id="external-book-results" class="mt-md"></div>
@@ -355,6 +359,7 @@ const BookForm = (() => {
     const year = container.querySelector('#external-filter-year')?.value.trim() || '';
     const exact = container.querySelector('#external-search-exact')?.checked || false;
     const includeVariants = container.querySelector('#external-include-variants')?.checked || false;
+    const useBne = container.querySelector('#external-use-bne')?.checked ?? true;
 
     return {
       mode,
@@ -364,6 +369,7 @@ const BookForm = (() => {
       year: year || undefined,
       exact,
       includeVariants,
+      useBne,
     };
   }
 

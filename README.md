@@ -41,12 +41,13 @@ Esto ejecuta también `electron-rebuild` vía `postinstall`, necesario para `bet
 bun run dev
 ```
 
-### Búsqueda de libros en internet (Open Library + Google Books)
+### Búsqueda de libros en internet (Open Library + Google Books + BNE)
 
 La app soporta búsqueda/importación de libros desde catálogos externos.
 
 - `Open Library`: se usa por defecto sin configuración extra.
 - `Google Books`: opcional, recomendado para mejor cobertura.
+- `BNE (Biblioteca Nacional de España)`: integrado por SRU para enriquecer resultados bibliográficos.
 
 Para habilitar Google Books con tu propia cuota, define `GOOGLE_BOOKS_API_KEY` antes de arrancar la app:
 
