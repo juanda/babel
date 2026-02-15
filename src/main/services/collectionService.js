@@ -74,10 +74,15 @@ function removeBook(collectionId, bookId) {
 function getBooks(collectionId) {
   return getDb()
     .prepare(
-      `SELECT b.*
+      `SELECT
+        b.*,
+        GROUP_CONCAT(a.name, ', ') AS authors
        FROM book_collections bc
        JOIN books b ON b.id = bc.book_id
+       LEFT JOIN book_authors ba ON ba.book_id = b.id
+       LEFT JOIN authors a ON a.id = ba.author_id
        WHERE bc.collection_id = ?
+       GROUP BY b.id
        ORDER BY b.title COLLATE NOCASE`
     )
     .all(collectionId);

@@ -1,4 +1,16 @@
 const CollectionManager = (() => {
+  function refreshCollectionsView() {
+    const currentPath = Router.parseHash().path;
+    if (currentPath === 'collections') {
+      const container = document.getElementById('view-container');
+      if (container) {
+        render(container);
+      }
+      return;
+    }
+    Router.navigate('collections');
+  }
+
   async function render(container) {
     container.innerHTML = '<div class="spinner"></div>';
     const result = await window.api.collections.getAll();
@@ -20,6 +32,7 @@ const CollectionManager = (() => {
                   <td>${c.description || '-'}</td>
                   <td>${c.book_count || 0}</td>
                   <td class="table-actions">
+                    <button class="btn btn-sm btn-secondary js-collection-view" data-id="${c.id}">Ver</button>
                     <button class="btn btn-sm btn-secondary js-collection-edit" data-id="${c.id}">Editar</button>
                     <button class="btn btn-sm btn-danger js-collection-remove" data-id="${c.id}">Eliminar</button>
                   </td>
@@ -32,6 +45,9 @@ const CollectionManager = (() => {
     `;
 
     document.getElementById('collection-new').addEventListener('click', () => openModal());
+    container.querySelectorAll('.js-collection-view').forEach((btn) => {
+      btn.addEventListener('click', () => view(Number(btn.dataset.id)));
+    });
     container.querySelectorAll('.js-collection-edit').forEach((btn) => {
       btn.addEventListener('click', () => edit(Number(btn.dataset.id)));
     });
@@ -84,7 +100,7 @@ const CollectionManager = (() => {
 
       Modal.close();
       Toast.success('Colección guardada');
-      Router.navigate('collections');
+      refreshCollectionsView();
     });
   }
 
@@ -95,6 +111,47 @@ const CollectionManager = (() => {
       return;
     }
     openModal(result.data);
+  }
+
+  async function view(id) {
+    const [collectionRes, booksRes] = await Promise.all([
+      window.api.collections.getById(id),
+      window.api.collections.getBooks(id),
+    ]);
+
+    if (!collectionRes.success || !collectionRes.data) {
+      Toast.error('Colección no encontrada');
+      return;
+    }
+
+    if (!booksRes.success) {
+      Toast.error(booksRes.error || 'No se pudieron cargar los libros');
+      return;
+    }
+
+    const collection = collectionRes.data;
+    const books = booksRes.data || [];
+
+    const content = books.length === 0
+      ? '<p class="text-muted">Esta colección no tiene libros asociados.</p>'
+      : `
+        <div class="table-container">
+          <table class="data-table">
+            <thead><tr><th>Título</th><th>Autor(es)</th></tr></thead>
+            <tbody>
+              ${books
+                .map((book) => `<tr><td>${book.title || '-'}</td><td>${book.authors || '-'}</td></tr>`)
+                .join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+    Modal.open({
+      title: `Libros en "${collection.name}"`,
+      content,
+      size: 'md',
+    });
   }
 
   async function remove(id) {
@@ -110,11 +167,11 @@ const CollectionManager = (() => {
     const result = await window.api.collections.delete(id);
     if (result.success) {
       Toast.success('Colección eliminada');
-      Router.navigate('collections');
+      refreshCollectionsView();
     } else {
       Toast.error(result.error || 'No se pudo eliminar');
     }
   }
 
-  return { render, edit, remove };
+  return { render, view, edit, remove };
 })();

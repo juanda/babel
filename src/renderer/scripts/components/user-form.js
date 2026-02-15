@@ -2,6 +2,18 @@
  * Gestión de usuarios prestatarios
  */
 const UserForm = (() => {
+  function refreshUsersView() {
+    const currentPath = Router.parseHash().path;
+    if (currentPath === 'users') {
+      const container = document.getElementById('view-container');
+      if (container) {
+        renderList(container);
+      }
+      return;
+    }
+    Router.navigate('users');
+  }
+
   async function renderList(container) {
     container.innerHTML = '<div class="spinner"></div>';
 
@@ -167,7 +179,7 @@ const UserForm = (() => {
       if (result.success) {
         Modal.close();
         Toast.success(userId ? 'Usuario actualizado' : 'Usuario creado');
-        Router.navigate('users');
+        refreshUsersView();
       } else {
         Toast.error(result.error || 'Error al guardar');
       }
@@ -186,7 +198,7 @@ const UserForm = (() => {
     const result = await window.api.users.delete(id);
     if (result.success) {
       Toast.success('Usuario eliminado');
-      Router.navigate('users');
+      refreshUsersView();
     } else {
       Toast.error(result.error || 'Error al eliminar');
     }

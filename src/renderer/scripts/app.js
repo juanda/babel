@@ -123,14 +123,39 @@
       return;
     }
 
-    const result = await window.api.books.getById(id);
-    if (!result.success || !result.data) {
+    const [bookRes, collectionsRes, bookCollectionsRes] = await Promise.all([
+      window.api.books.getById(id),
+      window.api.collections.getAll(),
+      window.api.collections.getAll().then(async (allRes) => {
+        if (!allRes.success) return { success: false, data: [] };
+        try {
+          const entries = await Promise.all(
+            allRes.data.map(async (c) => {
+              const books = await window.api.collections.getBooks(c.id);
+              if (!books.success) return null;
+              const hasBook = books.data.some((item) => item.id === id);
+              return hasBook ? c : null;
+            })
+          );
+          return { success: true, data: entries.filter(Boolean) };
+        } catch (_error) {
+          return { success: false, data: [] };
+        }
+      }),
+    ]);
+
+    if (!bookRes.success || !bookRes.data) {
       container.innerHTML = '<p class="text-muted">Libro no encontrado</p>';
       return;
     }
 
-    const b = result.data;
+    const b = bookRes.data;
+    const allCollections = collectionsRes.success ? collectionsRes.data : [];
+    const assignedCollections = bookCollectionsRes.success ? bookCollectionsRes.data : [];
     const authors = (b.bookAuthors || []).map((a) => `${a.name} (${AuthorSelector.translateRole(a.role)})`).join(', ');
+    const assignedIds = new Set(assignedCollections.map((c) => c.id));
+    const availableCollections = allCollections.filter((c) => !assignedIds.has(c.id));
+
     container.innerHTML = `
       <div class="detail-card">
         <div class="view-header">
@@ -145,6 +170,30 @@
         <p><strong>Género:</strong> ${escapeHtml(b.genre || '-')}</p>
         <p><strong>Estado:</strong> ${escapeHtml(b.read_status || '-')}</p>
         <p><strong>Descripción:</strong> ${escapeHtml(b.description || '-')}</p>
+
+        <div class="mt-lg">
+          <h3>Colecciones</h3>
+          <div class="form-inline mt-md">
+            <select class="form-select" id="book-collection-select">
+              <option value="">Agregar a colección...</option>
+              ${availableCollections.map((c) => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('')}
+            </select>
+            <button class="btn btn-secondary" id="book-collection-add">Agregar</button>
+          </div>
+          <div id="book-collections-list" class="mt-md">
+            ${assignedCollections.length === 0
+              ? '<span class="text-muted text-sm">Este libro no está en ninguna colección.</span>'
+              : assignedCollections
+                  .map(
+                    (c) => `<span class="badge badge-primary" style="margin-right:8px;">
+                      ${escapeHtml(c.name)}
+                      <button class="icon-btn js-book-collection-remove" data-id="${c.id}" style="margin-left:6px;">×</button>
+                    </span>`
+                  )
+                  .join('')}
+          </div>
+        </div>
+
         <div id="reading-tracker" class="mt-lg"></div>
       </div>
     `;
@@ -169,6 +218,36 @@
       Toast.success('Libro eliminado');
       SearchBar.loadData();
       Router.navigate('books');
+    });
+    container.querySelector('#book-collection-add')?.addEventListener('click', async () => {
+      const select = container.querySelector('#book-collection-select');
+      const collectionId = Number(select.value);
+      if (!collectionId) {
+        Toast.warning('Selecciona una colección');
+        return;
+      }
+
+      const addRes = await window.api.collections.addBook(collectionId, b.id);
+      if (!addRes.success) {
+        Toast.error(addRes.error || 'No se pudo agregar a la colección');
+        return;
+      }
+
+      Toast.success('Libro agregado a colección');
+      Router.navigate('book-detail', { id: b.id, t: Date.now() });
+    });
+    container.querySelectorAll('.js-book-collection-remove').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const collectionId = Number(btn.dataset.id);
+        const remRes = await window.api.collections.removeBook(collectionId, b.id);
+        if (!remRes.success) {
+          Toast.error(remRes.error || 'No se pudo quitar de la colección');
+          return;
+        }
+
+        Toast.success('Libro eliminado de la colección');
+        Router.navigate('book-detail', { id: b.id, t: Date.now() });
+      });
     });
 
     ReadingTracker.render(document.getElementById('reading-tracker'), b);

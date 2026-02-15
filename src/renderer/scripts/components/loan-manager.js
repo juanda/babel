@@ -2,6 +2,18 @@
  * Gestor de préstamos
  */
 const LoanManager = (() => {
+  function refreshLoansView() {
+    const currentPath = Router.parseHash().path;
+    if (currentPath === 'loans') {
+      const container = document.getElementById('view-container');
+      if (container) {
+        render(container);
+      }
+      return;
+    }
+    Router.navigate('loans');
+  }
+
   async function render(container) {
     container.innerHTML = '<div class="spinner"></div>';
 
@@ -184,7 +196,7 @@ const LoanManager = (() => {
       if (result.success) {
         Modal.close();
         Toast.success('Préstamo creado');
-        Router.navigate('loans');
+        refreshLoansView();
       } else {
         Toast.error(result.error || 'Error al crear préstamo');
       }
@@ -228,7 +240,7 @@ const LoanManager = (() => {
       if (result.success) {
         Modal.close();
         Toast.success('Libro devuelto');
-        Router.navigate('loans');
+        refreshLoansView();
       } else {
         Toast.error(result.error || 'Error al devolver');
       }

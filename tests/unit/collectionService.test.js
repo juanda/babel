@@ -11,6 +11,8 @@ describe('collectionService', () => {
 
     db.prepare('INSERT INTO books (title, read_status, loanable) VALUES (?, ?, ?)').run('Libro A', 'unread', 1);
     db.prepare('INSERT INTO books (title, read_status, loanable) VALUES (?, ?, ?)').run('Libro B', 'unread', 1);
+    db.prepare('INSERT INTO authors (name) VALUES (?)').run('Autor A');
+    db.prepare('INSERT INTO book_authors (book_id, author_id, author_order, role) VALUES (?, ?, ?, ?)').run(1, 1, 1, 'author');
   });
 
   afterEach(() => {
@@ -52,6 +54,7 @@ describe('collectionService', () => {
 
     let books = collectionService.getBooks(created.id);
     expect(books.length).toBe(2);
+    expect(books.find((b) => b.id === 1)?.authors).toBe('Autor A');
 
     collectionService.removeBook(created.id, 1);
     books = collectionService.getBooks(created.id);
