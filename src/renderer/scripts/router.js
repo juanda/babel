@@ -52,6 +52,7 @@ const Router = (() => {
         reading: 'Lecturas',
         reports: 'Reportes',
         collections: 'Colecciones',
+        'label-print': 'Impresión de Tejuelos',
         settings: 'Configuración',
       };
       if (titleEl) {

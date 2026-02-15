@@ -54,6 +54,14 @@
     return document.getElementById('view-container');
   }
 
+  function getLabelTemplateOptions() {
+    return [
+      { value: '65', label: '65 etiquetas por hoja (38.1×21.2 mm)' },
+      { value: '24', label: '24 etiquetas por hoja (63.5×33.9 mm)' },
+      { value: '21', label: '21 etiquetas por hoja (63.5×38.1 mm)' },
+    ];
+  }
+
   async function renderDashboard() {
     const container = viewContainer();
     container.innerHTML = '<div class="spinner"></div>';
@@ -118,6 +126,7 @@
           Tejuelo no impreso
         </label>
         <button class="btn btn-secondary" id="book-filter-apply">Filtrar</button>
+        <button class="btn btn-primary" id="book-print-labels">Imprimir tejuelos</button>
       </div>
       <div id="books-content" class="mt-md"></div>
     `;
@@ -135,7 +144,138 @@
     };
 
     document.getElementById('book-filter-apply').addEventListener('click', load);
+    document.getElementById('book-print-labels').addEventListener('click', () => {
+      const selected = BookList.getSelectedBooks();
+      if (!selected.length) {
+        Toast.warning('Selecciona al menos un libro para imprimir tejuelos');
+        return;
+      }
+
+      Store.set('labelPrintSelection', selected.map((book) => book.id));
+      Router.navigate('label-print');
+    });
     load();
+  }
+
+  async function renderLabelPrint() {
+    const container = viewContainer();
+    const selectedIds = Array.isArray(Store.get('labelPrintSelection')) ? Store.get('labelPrintSelection') : [];
+
+    if (!selectedIds.length) {
+      container.innerHTML = `
+        <div class="detail-card">
+          <h2>Imprimir tejuelos</h2>
+          <p class="text-muted mt-md">No hay libros seleccionados.</p>
+          <div class="form-actions">
+            <button class="btn btn-secondary" id="label-print-back-empty">Volver</button>
+          </div>
+        </div>
+      `;
+      container.querySelector('#label-print-back-empty')?.addEventListener('click', () => Router.navigate('books'));
+      return;
+    }
+
+    container.innerHTML = '<div class="spinner"></div>';
+    const loaded = await Promise.all(selectedIds.map((id) => window.api.books.getById(id)));
+    const books = loaded.filter((res) => res.success && res.data).map((res) => res.data);
+    const printableBooks = books.filter((book) => String(book.signature || '').trim());
+    const skippedCount = books.length - printableBooks.length;
+    const templateOptions = getLabelTemplateOptions();
+
+    container.innerHTML = `
+      <div class="detail-card">
+        <h2>Imprimir tejuelos</h2>
+        <p class="text-muted mt-md">Seleccionados: ${books.length}. Con signatura imprimible: ${printableBooks.length}.</p>
+        ${skippedCount > 0 ? `<p class="text-muted text-sm">Se omiten ${skippedCount} libro(s) sin signatura.</p>` : ''}
+
+        <div class="form-row mt-lg">
+          <div class="form-group">
+            <label class="form-label">Plantilla</label>
+            <select class="form-select" id="label-template">
+              ${templateOptions.map((option) => `<option value="${option.value}">${escapeHtml(option.label)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Salida</label>
+            <div class="form-checkbox-grid">
+              <label class="form-checkbox form-checkbox-card">
+                <input type="radio" name="label-output" value="pdf" checked>
+                Generar PDF
+              </label>
+              <label class="form-checkbox form-checkbox-card">
+                <input type="radio" name="label-output" value="printer">
+                Enviar a impresora
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-container mt-md">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Signatura</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${printableBooks
+                .map((book) => `<tr><td>${escapeHtml(book.title || '-')}</td><td>${escapeHtml(book.signature || '-')}</td></tr>`)
+                .join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-secondary" id="label-print-cancel">Cancelar</button>
+          <button class="btn btn-primary" id="label-print-submit">Imprimir</button>
+        </div>
+      </div>
+    `;
+
+    container.querySelector('#label-print-cancel')?.addEventListener('click', () => Router.navigate('books'));
+    container.querySelector('#label-print-submit')?.addEventListener('click', async () => {
+      if (!printableBooks.length) {
+        Toast.warning('No hay libros con signatura para imprimir');
+        return;
+      }
+
+      const button = container.querySelector('#label-print-submit');
+      const template = container.querySelector('#label-template')?.value || '65';
+      const output = container.querySelector('input[name="label-output"]:checked')?.value || 'pdf';
+      if (button) button.disabled = true;
+
+      try {
+        const result = await window.api.books.printLabels({
+          books: printableBooks.map((book) => ({ id: book.id, signature: book.signature })),
+          template,
+          output,
+        });
+
+        if (!result.success) {
+          Toast.error(result.error || 'No se pudo completar la impresión');
+          return;
+        }
+
+        await Promise.all(
+          printableBooks.map((book) =>
+            window.api.books.update(book.id, {
+              label_printed: 1,
+            })
+          )
+        );
+
+        if (output === 'pdf') {
+          Toast.success(result.data?.saved ? 'PDF generado correctamente' : 'Generación de PDF cancelada');
+        } else {
+          Toast.success('Trabajo enviado a la impresora');
+        }
+
+        Router.navigate('books', { t: Date.now() });
+      } finally {
+        if (button) button.disabled = false;
+      }
+    });
   }
 
   async function renderBookDetail(params) {
@@ -396,6 +536,7 @@
     Router.register('reading', () => ReadingTracker.renderPage(viewContainer()));
     Router.register('reports', () => Chart.renderReportsPage(viewContainer()));
     Router.register('collections', () => CollectionManager.render(viewContainer()));
+    Router.register('label-print', () => renderLabelPrint());
     Router.register('settings', () => renderSettings());
   }
 

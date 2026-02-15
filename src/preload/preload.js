@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld('api', {
     search: (query) => ipcRenderer.invoke('books:search', query),
     searchExternal: (query, options) => ipcRenderer.invoke('books:searchExternal', query, options),
     uploadCover: (filePath) => ipcRenderer.invoke('books:uploadCover', filePath),
+    printLabels: (payload) => ipcRenderer.invoke('books:printLabels', payload),
   },
 
   // Authors

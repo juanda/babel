@@ -5,6 +5,7 @@ const BookList = (() => {
   const ITEMS_PER_PAGE = 24;
   let currentPage = 1;
   let currentBooks = [];
+  let selectedBookIds = new Set();
   let currentFilters = {};
   let viewMode = Store.get('viewMode') || 'grid';
 
@@ -25,6 +26,7 @@ const BookList = (() => {
   async function render(container, filters = {}) {
     currentFilters = filters;
     currentPage = 1;
+    selectedBookIds = new Set();
     container.innerHTML = '<div class="flex items-center justify-between"><div class="spinner"></div></div>';
 
     try {
@@ -49,6 +51,7 @@ const BookList = (() => {
       <div class="view-header">
         <div>
           <span class="text-secondary text-sm">${currentBooks.length} libro${currentBooks.length !== 1 ? 's' : ''}</span>
+          <span class="text-secondary text-sm" style="margin-left:8px;">Seleccionados: ${selectedBookIds.size}</span>
         </div>
         <div class="view-actions">
           <div class="view-toggle">
@@ -105,6 +108,9 @@ const BookList = (() => {
     return `
       <div class="book-card js-open-book" data-id="${book.id}">
         <div class="book-card-cover">
+          <label class="book-card-select">
+            <input type="checkbox" class="js-select-book" data-id="${book.id}" ${selectedBookIds.has(book.id) ? 'checked' : ''}>
+          </label>
           ${coverHtml}
           ${statusBadge ? `<span class="book-card-badge">${statusBadge}</span>` : ''}
           ${loanBadge ? `<span class="book-card-badge" style="top:36px">${loanBadge}</span>` : ''}
@@ -127,6 +133,7 @@ const BookList = (() => {
         <table class="data-table">
           <thead>
             <tr>
+              <th style="width:40px;">Sel</th>
               <th>Título</th>
               <th>Autor(es)</th>
               <th>Género</th>
@@ -141,6 +148,9 @@ const BookList = (() => {
     books.forEach((book) => {
       html += `
         <tr class="clickable-row js-open-book" data-id="${book.id}">
+          <td>
+            <input type="checkbox" class="js-select-book" data-id="${book.id}" ${selectedBookIds.has(book.id) ? 'checked' : ''}>
+          </td>
           <td><strong>${book.title}</strong>${book.subtitle ? `<br><small class="text-muted">${book.subtitle}</small>` : ''}</td>
           <td>${book.authors || 'Sin autor'}</td>
           <td>${book.genre || '-'}</td>
@@ -207,6 +217,21 @@ const BookList = (() => {
       });
     });
 
+    container.querySelectorAll('.js-select-book').forEach((input) => {
+      input.addEventListener('click', (event) => {
+        event.stopPropagation();
+      });
+      input.addEventListener('change', (event) => {
+        const id = Number(input.dataset.id);
+        if (event.target.checked) {
+          selectedBookIds.add(id);
+        } else {
+          selectedBookIds.delete(id);
+        }
+        renderView(container);
+      });
+    });
+
     container.querySelectorAll('.js-edit-book').forEach((btn) => {
       btn.addEventListener('click', (event) => {
         event.stopPropagation();
@@ -257,6 +282,7 @@ const BookList = (() => {
     if (result.success) {
       Toast.success('Libro eliminado');
       currentBooks = currentBooks.filter((b) => b.id !== id);
+      selectedBookIds.delete(id);
       const container = document.getElementById('view-container');
       if (container) renderView(container);
     } else {
@@ -264,7 +290,11 @@ const BookList = (() => {
     }
   }
 
-  return { render, goToPage, setViewMode, deleteBook, __test: { hasActiveFilters, getEmptyStateConfig } };
+  function getSelectedBooks() {
+    return currentBooks.filter((b) => selectedBookIds.has(b.id));
+  }
+
+  return { render, goToPage, setViewMode, deleteBook, getSelectedBooks, __test: { hasActiveFilters, getEmptyStateConfig } };
 })();
 
 if (typeof module !== 'undefined' && module.exports) {

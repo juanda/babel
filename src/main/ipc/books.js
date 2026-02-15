@@ -1,5 +1,6 @@
 const bookService = require('../services/bookService');
 const externalBookService = require('../services/externalBookService');
+const labelPrintService = require('../services/labelPrintService');
 const { app } = require('electron');
 const path = require('path');
 const fs = require('fs');
@@ -40,6 +41,14 @@ function register(ipcMain) {
   ipcMain.handle('books:searchExternal', async (_e, query, options) => {
     try {
       return ok(await externalBookService.searchBooks(query, options || {}));
+    } catch (error) {
+      return fail(error);
+    }
+  });
+
+  ipcMain.handle('books:printLabels', async (_e, payload) => {
+    try {
+      return ok(await labelPrintService.printLabels(payload || {}));
     } catch (error) {
       return fail(error);
     }
