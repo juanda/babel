@@ -168,6 +168,7 @@ async function searchOpenLibrary(query, options = {}, limit = 100) {
       source: 'openlibrary',
       external_id: doc.key || null,
       isbn,
+      isbns: (doc.isbn || []).map(cleanIsbn).filter(Boolean),
       title: doc.title || null,
       subtitle: doc.subtitle || null,
       authors: Array.isArray(doc.author_name) ? doc.author_name.filter(Boolean) : [],
@@ -188,7 +189,7 @@ async function searchGoogleBooks(query, options = {}, limit = 40) {
     q: buildGoogleQuery(query, options),
     maxResults: String(Math.min(limit, 40)),
     printType: 'books',
-    projection: 'lite',
+    projection: 'full',
   });
 
   if (options.language && options.language !== 'other') {
@@ -215,6 +216,7 @@ async function searchGoogleBooks(query, options = {}, limit = 40) {
       source: 'googlebooks',
       external_id: item.id || null,
       isbn: pickIsbn(identifiers),
+      isbns: identifiers.map(cleanIsbn).filter(Boolean),
       title: info.title || null,
       subtitle: info.subtitle || null,
       authors: Array.isArray(info.authors) ? info.authors.filter(Boolean) : [],

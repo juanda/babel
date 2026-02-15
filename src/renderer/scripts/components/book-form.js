@@ -331,6 +331,7 @@ const BookForm = (() => {
             <tr>
               <th>Título</th>
               <th>Autor(es)</th>
+              <th>ISBN</th>
               <th>Fuente</th>
               <th>Acción</th>
             </tr>
@@ -344,6 +345,7 @@ const BookForm = (() => {
                     ${item.publisher || item.publication_date ? `<br><small class="text-muted">${escapeHtml(item.publisher || '-')} · ${escapeHtml(item.publication_date || '-')}</small>` : ''}
                   </td>
                   <td>${escapeHtml((item.authors || []).join(', ') || '-')}</td>
+                  <td>${escapeHtml(resolveImportedIsbn(item) || '-')}</td>
                   <td><span class="badge badge-secondary">${escapeHtml(item.source || 'externo')}</span></td>
                   <td><button type="button" class="btn btn-sm btn-primary js-import-external-book" data-index="${index}">Usar</button></td>
                 </tr>`
@@ -394,9 +396,10 @@ const BookForm = (() => {
   }
 
   async function applyExternalBook(container, externalBook) {
+    const importedIsbn = resolveImportedIsbn(externalBook);
     setInputValue(container, '#book-title', externalBook.title || '');
     setInputValue(container, '#book-subtitle', externalBook.subtitle || '');
-    setInputValue(container, '#book-isbn', externalBook.isbn || '');
+    setInputValue(container, '#book-isbn', importedIsbn || '');
     setInputValue(container, '#book-publisher', externalBook.publisher || '');
     setInputValue(container, '#book-publication-date', externalBook.publication_date || '');
     setInputValue(container, '#book-pages', externalBook.pages || '');
@@ -426,6 +429,9 @@ const BookForm = (() => {
       );
     }
 
+    if (!importedIsbn) {
+      Toast.warning('El resultado no incluye ISBN en la fuente seleccionada');
+    }
     Toast.success('Datos importados al formulario');
   }
 
@@ -467,6 +473,25 @@ const BookForm = (() => {
       .replace(/>/g, '&gt;')
       .replace(/\"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+
+  function normalizeIsbn(value) {
+    return String(value || '').replace(/[^0-9Xx]/g, '').toUpperCase();
+  }
+
+  function resolveImportedIsbn(externalBook) {
+    if (!externalBook) return null;
+
+    const direct = normalizeIsbn(externalBook.isbn);
+    if (direct.length === 10 || direct.length === 13) return direct;
+
+    const list = Array.isArray(externalBook.isbns) ? externalBook.isbns.map(normalizeIsbn) : [];
+    const isbn13 = list.find((id) => id.length === 13);
+    if (isbn13) return isbn13;
+    const isbn10 = list.find((id) => id.length === 10);
+    if (isbn10) return isbn10;
+
+    return null;
   }
 
   function renderCoverPreview(container, coverUrl) {

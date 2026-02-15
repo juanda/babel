@@ -80,6 +80,7 @@ function parseRecordData(xml) {
       source: 'bne',
       external_id: getFirst(recordXml, 'identifier') || null,
       isbn,
+      isbns: identifiers.map(cleanIsbn).filter((id) => id.length === 10 || id.length === 13),
       title,
       subtitle: null,
       authors: creators,
