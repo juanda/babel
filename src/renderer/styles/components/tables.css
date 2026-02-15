@@ -70,6 +70,14 @@
 }
 
 .table-actions {
-  display: flex;
-  gap: var(--spacing-xs);
+  white-space: nowrap;
+}
+
+.data-table td.table-actions {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.table-actions > * + * {
+  margin-left: var(--spacing-xs);
 }

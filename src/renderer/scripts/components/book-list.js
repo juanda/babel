@@ -7,6 +7,7 @@ const BookList = (() => {
   let currentBooks = [];
   let currentFilters = {};
   let viewMode = Store.get('viewMode') || 'grid';
+  let mountContainer = null;
 
   function hasActiveFilters(filters = {}) {
     return Object.values(filters).some((value) => value !== undefined && value !== null && value !== '');
@@ -23,6 +24,7 @@ const BookList = (() => {
   }
 
   async function render(container, filters = {}) {
+    mountContainer = container;
     currentFilters = filters;
     currentPage = 1;
     container.innerHTML = '<div class="flex items-center justify-between"><div class="spinner"></div></div>';
@@ -230,17 +232,15 @@ const BookList = (() => {
 
   function goToPage(page) {
     currentPage = page;
-    const container = document.getElementById('view-container');
-    if (container) renderView(container);
+    if (mountContainer) renderView(mountContainer);
   }
 
   function setViewMode(mode) {
     viewMode = mode;
     localStorage.setItem('viewMode', mode);
     Store.set('viewMode', mode);
-    const container = document.getElementById('view-container');
-    if (container) {
-      renderView(container);
+    if (mountContainer) {
+      renderView(mountContainer);
     }
   }
 
@@ -257,8 +257,7 @@ const BookList = (() => {
     if (result.success) {
       Toast.success('Libro eliminado');
       currentBooks = currentBooks.filter((b) => b.id !== id);
-      const container = document.getElementById('view-container');
-      if (container) renderView(container);
+      if (mountContainer) renderView(mountContainer);
     } else {
       Toast.error(result.error || 'Error al eliminar');
     }
