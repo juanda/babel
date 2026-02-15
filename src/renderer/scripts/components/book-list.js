@@ -85,12 +85,14 @@ const BookList = (() => {
       : `<div class="no-cover"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg><span class="text-xs">Sin portada</span></div>`;
 
     const statusBadge = getStatusBadge(book.read_status);
+    const loanBadge = getLoanBadge(book);
 
     return `
       <div class="book-card js-open-book" data-id="${book.id}">
         <div class="book-card-cover">
           ${coverHtml}
           ${statusBadge ? `<span class="book-card-badge">${statusBadge}</span>` : ''}
+          ${loanBadge ? `<span class="book-card-badge" style="top:36px">${loanBadge}</span>` : ''}
         </div>
         <div class="book-card-info">
           <div class="book-card-title">${book.title}</div>
@@ -127,7 +129,7 @@ const BookList = (() => {
           <td><strong>${book.title}</strong>${book.subtitle ? `<br><small class="text-muted">${book.subtitle}</small>` : ''}</td>
           <td>${book.authors || 'Sin autor'}</td>
           <td>${book.genre || '-'}</td>
-          <td>${getStatusBadge(book.read_status)}</td>
+          <td>${getStatusBadge(book.read_status)} ${getLoanBadge(book) || ''}</td>
           <td>${book.rating ? StarRating.display(book.rating) : '-'}</td>
           <td class="table-actions">
             <button class="icon-btn js-edit-book" data-id="${book.id}" title="Editar">
@@ -152,6 +154,16 @@ const BookList = (() => {
       completed: '<span class="badge badge-success">Leído</span>',
     };
     return badges[status] || '';
+  }
+
+  function getLoanBadge(book) {
+    if (!book || !book.is_loaned) {
+      return '<span class="badge badge-success">Disponible</span>';
+    }
+    if (book.loan_status === 'overdue') {
+      return '<span class="badge badge-error">Prestado (vencido)</span>';
+    }
+    return '<span class="badge badge-warning">Prestado</span>';
   }
 
   function renderPagination(totalPages) {

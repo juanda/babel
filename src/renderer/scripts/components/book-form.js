@@ -24,63 +24,71 @@ const BookForm = (() => {
         <form id="book-form" class="mt-lg">
           <div class="detail-card mb-lg">
             <h3>Buscar en internet</h3>
-            <p class="text-muted text-sm">Puedes buscar de forma general o por campo específico e importar datos automáticamente.</p>
-            <div class="form-row mt-md">
-              <div class="form-group">
-                <label class="form-label">Modo de búsqueda</label>
-                <select class="form-select" id="external-search-mode">
-                  <option value="general" selected>General</option>
-                  <option value="isbn">ISBN exacto</option>
-                  <option value="title">Título</option>
-                  <option value="author">Autor</option>
-                  <option value="publisher">Editorial</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Idioma (filtro)</label>
-                <select class="form-select" id="external-search-language">
-                  <option value="">Cualquiera</option>
-                  <option value="es">Español</option>
-                  <option value="en">Inglés</option>
-                  <option value="fr">Francés</option>
-                  <option value="pt">Portugués</option>
-                  <option value="de">Alemán</option>
-                  <option value="it">Italiano</option>
-                </select>
-              </div>
-            </div>
+            <p class="text-muted text-sm">Busca por título, autor, editorial o ISBN e importa datos automáticamente.</p>
             <div class="form-inline mt-md">
               <input type="text" class="form-input" id="external-book-query" placeholder="Ej: Cien años de soledad o 9788497592208">
               <button type="button" class="btn btn-secondary" id="external-book-search-btn">Buscar</button>
             </div>
-            <div class="form-row mt-md">
-              <div class="form-group">
-                <label class="form-label">Autor (filtro)</label>
-                <input type="text" class="form-input" id="external-filter-author" placeholder="Opcional">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Editorial (filtro)</label>
-                <input type="text" class="form-input" id="external-filter-publisher" placeholder="Opcional">
-              </div>
+            <div class="mt-md">
+              <label class="form-checkbox">
+                <input type="checkbox" id="external-search-advanced-toggle">
+                Búsqueda avanzada
+              </label>
             </div>
-            <div class="form-row mt-md">
-              <div class="form-group">
-                <label class="form-label">Año (filtro)</label>
-                <input type="number" class="form-input" id="external-filter-year" min="1000" max="2100" placeholder="Ej: 2015">
+            <div id="external-search-advanced-panel" class="hidden">
+              <div class="form-row mt-md">
+                <div class="form-group">
+                  <label class="form-label">Modo de búsqueda</label>
+                  <select class="form-select" id="external-search-mode">
+                    <option value="general" selected>General</option>
+                    <option value="isbn">ISBN exacto</option>
+                    <option value="title">Título</option>
+                    <option value="author">Autor</option>
+                    <option value="publisher">Editorial</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Idioma (filtro)</label>
+                  <select class="form-select" id="external-search-language">
+                    <option value="">Cualquiera</option>
+                    <option value="es">Español</option>
+                    <option value="en">Inglés</option>
+                    <option value="fr">Francés</option>
+                    <option value="pt">Portugués</option>
+                    <option value="de">Alemán</option>
+                    <option value="it">Italiano</option>
+                  </select>
+                </div>
               </div>
-              <div class="form-group" style="display:flex;align-items:flex-end;gap:16px;">
-                <label class="form-checkbox">
-                  <input type="checkbox" id="external-search-exact">
-                  Modo exacto
-                </label>
-                <label class="form-checkbox">
-                  <input type="checkbox" id="external-include-variants">
-                  Mostrar variantes/ediciones
-                </label>
-                <label class="form-checkbox">
-                  <input type="checkbox" id="external-use-bne" checked>
-                  Incluir BNE
-                </label>
+              <div class="form-row mt-md">
+                <div class="form-group">
+                  <label class="form-label">Autor (filtro)</label>
+                  <input type="text" class="form-input" id="external-filter-author" placeholder="Opcional">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Editorial (filtro)</label>
+                  <input type="text" class="form-input" id="external-filter-publisher" placeholder="Opcional">
+                </div>
+              </div>
+              <div class="form-row mt-md">
+                <div class="form-group">
+                  <label class="form-label">Año (filtro)</label>
+                  <input type="number" class="form-input" id="external-filter-year" min="1000" max="2100" placeholder="Ej: 2015">
+                </div>
+                <div class="form-group" style="display:flex;align-items:flex-end;gap:16px;">
+                  <label class="form-checkbox">
+                    <input type="checkbox" id="external-search-exact">
+                    Modo exacto
+                  </label>
+                  <label class="form-checkbox">
+                    <input type="checkbox" id="external-include-variants">
+                    Mostrar variantes/ediciones
+                  </label>
+                  <label class="form-checkbox">
+                    <input type="checkbox" id="external-use-bne">
+                    Incluir BNE
+                  </label>
+                </div>
               </div>
             </div>
             <div id="external-book-results" class="mt-md"></div>
@@ -273,6 +281,10 @@ const BookForm = (() => {
     container.querySelector('#external-book-search-btn').addEventListener('click', async () => {
       await handleExternalSearch(container);
     });
+    container.querySelector('#external-search-advanced-toggle').addEventListener('change', (event) => {
+      const advancedPanel = container.querySelector('#external-search-advanced-panel');
+      advancedPanel.classList.toggle('hidden', !event.target.checked);
+    });
     container.querySelector('#external-book-query').addEventListener('keydown', async (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
@@ -352,6 +364,14 @@ const BookForm = (() => {
   }
 
   function getExternalSearchOptions(container) {
+    const advanced = container.querySelector('#external-search-advanced-toggle')?.checked || false;
+    if (!advanced) {
+      return {
+        mode: 'general',
+        useBne: false,
+      };
+    }
+
     const mode = container.querySelector('#external-search-mode')?.value || 'general';
     const language = container.querySelector('#external-search-language')?.value || '';
     const author = container.querySelector('#external-filter-author')?.value.trim() || '';

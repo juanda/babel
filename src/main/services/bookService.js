@@ -5,7 +5,29 @@ function listQueryBase() {
   return `
     SELECT
       b.*,
-      GROUP_CONCAT(a.name, ', ') AS authors
+      GROUP_CONCAT(a.name, ', ') AS authors,
+      CASE
+        WHEN EXISTS (
+          SELECT 1 FROM loans l
+          WHERE l.book_id = b.id AND l.status IN ('active', 'overdue')
+        ) THEN 1
+        ELSE 0
+      END AS is_loaned,
+      (
+        SELECT l.status
+        FROM loans l
+        WHERE l.book_id = b.id AND l.status IN ('active', 'overdue')
+        ORDER BY l.loan_date DESC, l.id DESC
+        LIMIT 1
+      ) AS loan_status,
+      (
+        SELECT u.name
+        FROM loans l
+        JOIN users u ON u.id = l.user_id
+        WHERE l.book_id = b.id AND l.status IN ('active', 'overdue')
+        ORDER BY l.loan_date DESC, l.id DESC
+        LIMIT 1
+      ) AS loaned_to
     FROM books b
     LEFT JOIN book_authors ba ON ba.book_id = b.id
     LEFT JOIN authors a ON a.id = ba.author_id
@@ -51,7 +73,36 @@ function getAll(filters = {}) {
 }
 
 function getById(id) {
-  const book = getDb().prepare('SELECT * FROM books WHERE id = ?').get(id);
+  const book = getDb()
+    .prepare(
+      `SELECT
+        b.*,
+        CASE
+          WHEN EXISTS (
+            SELECT 1 FROM loans l
+            WHERE l.book_id = b.id AND l.status IN ('active', 'overdue')
+          ) THEN 1
+          ELSE 0
+        END AS is_loaned,
+        (
+          SELECT l.status
+          FROM loans l
+          WHERE l.book_id = b.id AND l.status IN ('active', 'overdue')
+          ORDER BY l.loan_date DESC, l.id DESC
+          LIMIT 1
+        ) AS loan_status,
+        (
+          SELECT u.name
+          FROM loans l
+          JOIN users u ON u.id = l.user_id
+          WHERE l.book_id = b.id AND l.status IN ('active', 'overdue')
+          ORDER BY l.loan_date DESC, l.id DESC
+          LIMIT 1
+        ) AS loaned_to
+      FROM books b
+      WHERE b.id = ?`
+    )
+    .get(id);
   if (!book) return null;
 
   const bookAuthors = getDb()

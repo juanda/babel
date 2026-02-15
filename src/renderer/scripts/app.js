@@ -155,6 +155,11 @@
     const authors = (b.bookAuthors || []).map((a) => `${a.name} (${AuthorSelector.translateRole(a.role)})`).join(', ');
     const assignedIds = new Set(assignedCollections.map((c) => c.id));
     const availableCollections = allCollections.filter((c) => !assignedIds.has(c.id));
+    const loanText = b.is_loaned
+      ? (b.loan_status === 'overdue'
+          ? `Prestado (vencido)${b.loaned_to ? ` a ${b.loaned_to}` : ''}`
+          : `Prestado${b.loaned_to ? ` a ${b.loaned_to}` : ''}`)
+      : 'Disponible';
 
     container.innerHTML = `
       <div class="detail-card">
@@ -169,6 +174,7 @@
         <p><strong>Autores:</strong> ${escapeHtml(authors || 'Sin autores')}</p>
         <p><strong>Género:</strong> ${escapeHtml(b.genre || '-')}</p>
         <p><strong>Estado:</strong> ${escapeHtml(b.read_status || '-')}</p>
+        <p><strong>Préstamo:</strong> ${escapeHtml(loanText)}</p>
         <p><strong>Descripción:</strong> ${escapeHtml(b.description || '-')}</p>
 
         <div class="mt-lg">

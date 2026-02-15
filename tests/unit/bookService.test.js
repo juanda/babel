@@ -11,6 +11,7 @@ describe('bookService', () => {
 
     db.prepare('INSERT INTO authors (name) VALUES (?)').run('Autor Uno');
     db.prepare('INSERT INTO authors (name) VALUES (?)').run('Autor Dos');
+    db.prepare('INSERT INTO users (name, active) VALUES (?, ?)').run('Usuario Test', 1);
   });
 
   afterEach(() => {
@@ -68,5 +69,29 @@ describe('bookService', () => {
     const all = bookService.getAll({});
     expect(all.length).toBe(1);
     expect(all[0].authors).toBe('Autor Uno');
+  });
+
+  test('getAll y getById incluyen estado de préstamo', () => {
+    const created = bookService.create({
+      title: 'Libro prestado',
+      language: 'es',
+      authors: [{ id: 1, role: 'author', author_order: 1 }],
+    });
+
+    db.prepare(
+      `INSERT INTO loans (book_id, user_id, loan_date, due_date, status)
+       VALUES (?, ?, ?, ?, ?)`
+    ).run(created.id, 1, '2026-01-01', '2026-01-10', 'active');
+
+    const list = bookService.getAll({});
+    const row = list.find((b) => b.id === created.id);
+    expect(row.is_loaned).toBe(1);
+    expect(row.loan_status).toBe('active');
+    expect(row.loaned_to).toBe('Usuario Test');
+
+    const detail = bookService.getById(created.id);
+    expect(detail.is_loaned).toBe(1);
+    expect(detail.loan_status).toBe('active');
+    expect(detail.loaned_to).toBe('Usuario Test');
   });
 });
