@@ -145,13 +145,13 @@
 
     document.getElementById('book-filter-apply').addEventListener('click', load);
     document.getElementById('book-print-labels').addEventListener('click', () => {
-      const selected = BookList.getSelectedBooks();
-      if (!selected.length) {
-        Toast.warning('Selecciona al menos un libro para imprimir tejuelos');
+      const booksToPrint = BookList.getCurrentBooks();
+      if (!booksToPrint.length) {
+        Toast.warning('No hay libros en el resultado actual para imprimir');
         return;
       }
 
-      Store.set('labelPrintSelection', selected.map((book) => book.id));
+      Store.set('labelPrintSelection', booksToPrint.map((book) => book.id));
       Router.navigate('label-print');
     });
     load();
@@ -185,7 +185,7 @@
     container.innerHTML = `
       <div class="detail-card">
         <h2>Imprimir tejuelos</h2>
-        <p class="text-muted mt-md">Seleccionados: ${books.length}. Con signatura imprimible: ${printableBooks.length}.</p>
+        <p class="text-muted mt-md">Libros del resultado actual: ${books.length}. Con signatura imprimible: ${printableBooks.length}.</p>
         ${skippedCount > 0 ? `<p class="text-muted text-sm">Se omiten ${skippedCount} libro(s) sin signatura.</p>` : ''}
 
         <div class="form-row mt-lg">
