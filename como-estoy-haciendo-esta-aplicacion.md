@@ -1,6 +1,6 @@
 # Cómo estoy haciendo esta aplicación
 
-Comencé la aplicación a las 18:00 del sábado, 14/02/2026.
+- Sábado, 14/02/2026, 18:00 comienzo la aplicación
 
 He comenzado por preguntar a claude web:
 
@@ -24,5 +24,15 @@ Y ha continuado el desarrollo. Ha llegado a un esqueleto básico en el que todav
 
 El siguiente paso, sugerido por codex, ha sido implementar tests. Y así he continuado.
 
-son las 19:35 y tengo una aplicación funcional lista para probar y refinar.
+- Sábado, 14/02/2026, 19:35. Esqueleto de la aplicación completamente funcional
+
+- Sábado, 14/02/2026, 20:20. He corregido algunos fallos y pulido algunas partes.
+
+- Domingo, 15/02/2026, 8:30. Comienzo a trabajar.
+
+- Domingo, 15/02/2026, 10:18. Corrijo algunos fallos y sigo puliendo
+
+
+
+
 
