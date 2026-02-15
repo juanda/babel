@@ -4,7 +4,19 @@ Todos los cambios relevantes de este proyecto se documentan en este archivo.
 
 El formato está inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
-## [Unreleased]
+## [v1.0.0-beta3] - 2026-02-15
+
+### Changed
+- Rediseño visual completo de la interfaz con estilo Brutalist Web Design (paleta, tipografía, layout y componentes).
+
+### Fixed
+- Importación de ISBN al usar resultados de búsqueda en internet.
+
+## [v1.0.0-beta2] - 2026-02-15
+
+### Changed
+- Pipeline CI/CD adaptado para usar `GITHUB_TOKEN` en GitHub Actions.
+- Build configurado para no auto-publicar artefactos sin credenciales explícitas.
 
 ## [v1.0.0-beta1] - 2026-02-15
 
@@ -39,5 +51,6 @@ El formato está inspirado en [Keep a Changelog](https://keepachangelog.com/es-E
 - Visualización de autores en modal de detalle de colecciones.
 - Indicador de estado de préstamo en cards/listado y detalle de libro.
 
-[unreleased]: https://github.com/juanda/babel/compare/v1.0.0-beta1...HEAD
+[unreleased]: https://github.com/juanda/babel/compare/v1.0.0-beta2...HEAD
+[v1.0.0-beta2]: https://github.com/juanda/babel/compare/v1.0.0-beta1...v1.0.0-beta2
 [v1.0.0-beta1]: https://github.com/juanda/babel/releases/tag/v1.0.0-beta1
