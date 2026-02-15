@@ -48,6 +48,8 @@ const bookSchema = z.object({
   tags: z.union([z.string(), z.null(), z.undefined()]).transform((v) => v || null),
   description: nullableTrimmed(),
   cover_url: urlString,
+  cdu: nullableTrimmed().refine((v) => !v || /^[0-9A-Za-z.:/()=+\-\s]+$/.test(v), 'CDU inválida'),
+  signature: nullableTrimmed(),
   location: nullableTrimmed(),
   condition: z.enum(['excellent', 'good', 'fair', 'poor']).nullable().optional().transform((v) => v ?? null),
   acquisition_date: dateString,

@@ -173,6 +173,8 @@
         <p class="text-muted">${escapeHtml(b.subtitle || '')}</p>
         <p><strong>Autores:</strong> ${escapeHtml(authors || 'Sin autores')}</p>
         <p><strong>Género:</strong> ${escapeHtml(b.genre || '-')}</p>
+        <p><strong>CDU:</strong> ${escapeHtml(b.cdu || '-')}</p>
+        <p><strong>Signatura:</strong> ${escapeHtml(b.signature || '-')}</p>
         <p><strong>Estado:</strong> ${escapeHtml(b.read_status || '-')}</p>
         <p><strong>Préstamo:</strong> ${escapeHtml(loanText)}</p>
         <p><strong>Descripción:</strong> ${escapeHtml(b.description || '-')}</p>

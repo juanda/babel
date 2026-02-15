@@ -5,6 +5,14 @@ const { app } = require('electron');
 
 let db = null;
 
+function ensureColumn(tableName, columnName, columnDefinition) {
+  const columns = db.prepare(`PRAGMA table_info(${tableName})`).all();
+  const hasColumn = columns.some((col) => col.name === columnName);
+  if (!hasColumn) {
+    db.exec(`ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${columnDefinition}`);
+  }
+}
+
 function getDbPath() {
   const userDataPath = app.getPath('userData');
   return path.join(userDataPath, 'biblioteca.db');
@@ -29,6 +37,10 @@ function initialize() {
   const schemaPath = path.join(__dirname, 'schema.sql');
   const schema = fs.readFileSync(schemaPath, 'utf-8');
   db.exec(schema);
+
+  // Migraciones incrementales para instalaciones existentes
+  ensureColumn('books', 'cdu', 'TEXT');
+  ensureColumn('books', 'signature', 'TEXT');
 
   console.log(`[DB] Base de datos inicializada en: ${dbPath}`);
   return db;

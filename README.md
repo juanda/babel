@@ -58,6 +58,36 @@ bun run dev
 
 Sin `GOOGLE_BOOKS_API_KEY`, la integración puede seguir funcionando con límites más restrictivos.
 
+### Generación de signatura CDU en el formulario de libros
+
+En `Nuevo libro` / `Editar libro` hay un botón `Generar CDU`.
+
+Cómo funciona actualmente:
+
+1. Toma el valor del campo `CDU` si ya lo has escrito.
+2. Si `CDU` está vacío, propone una CDU por heurística leyendo `Género` y `Descripción`:
+   - Literatura/novela/poesía -> `82`
+   - Historia -> `93/94`
+   - Filosofía -> `1`
+   - Religión -> `2`
+   - Ciencias sociales/economía/derecho -> `3`
+   - Ciencias (mate/física/química/biología) -> `5`
+   - Medicina/salud -> `61`
+   - Tecnología/ingeniería/informática -> `6`
+   - Arte/música/arquitectura -> `7`
+   - Lengua/lingüística -> `81`
+   - Geografía/viajes -> `91`
+   - Si no hay coincidencia -> `0` (generalidades)
+3. Obtiene código de autor: 3 letras del apellido principal del primer autor.
+4. Obtiene código de título: 3 letras del título (normalizado).
+5. Construye la signatura final con formato:
+   - `CDU + " " + AUT + " " + TIT`
+   - Ejemplo: `821.134.2 GAR CIE`
+
+Notas:
+- Es una ayuda automática, no sustitución de catalogación profesional.
+- Puedes editar manualmente `CDU` y `Signatura` antes de guardar.
+
 ## Comandos útiles
 
 - Ejecutar tests:

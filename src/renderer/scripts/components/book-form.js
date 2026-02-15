@@ -116,6 +116,22 @@ const BookForm = (() => {
             </div>
           </div>
 
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">CDU</label>
+              <input type="text" class="form-input" id="book-cdu" value="${book?.cdu || ''}" placeholder="Ej: 821.134.2">
+              <div class="form-hint">Clasificación Decimal Universal (puedes ajustarla manualmente).</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Signatura</label>
+              <div class="form-inline">
+                <input type="text" class="form-input" id="book-signature" value="${book?.signature || ''}" placeholder="Ej: 821.134.2 GAR CIE">
+                <button type="button" class="btn btn-secondary" id="book-generate-signature">Generar CDU</button>
+              </div>
+              <div class="form-hint">Formato sugerido: CDU + 3 letras del autor + 3 del título.</div>
+            </div>
+          </div>
+
           <div class="form-group">
             <label class="form-label">Autores</label>
             <div id="author-selector-container"></div>
@@ -277,6 +293,9 @@ const BookForm = (() => {
     });
     container.querySelector('#book-cover-select').addEventListener('click', async () => {
       await handleSelectCover(container);
+    });
+    container.querySelector('#book-generate-signature').addEventListener('click', () => {
+      generateCduSignature(container);
     });
     container.querySelector('#external-book-search-btn').addEventListener('click', async () => {
       await handleExternalSearch(container);
@@ -479,6 +498,89 @@ const BookForm = (() => {
     return String(value || '').replace(/[^0-9Xx]/g, '').toUpperCase();
   }
 
+  function normalizeText(value) {
+    return String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase()
+      .replace(/[^A-Z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function inferCduFromGenre(genre, description = '') {
+    const text = `${genre || ''} ${description || ''}`.toLowerCase();
+    const mappings = [
+      { pattern: /(novela|poes|teatro|cuento|literatura|ficci)/, cdu: '82' },
+      { pattern: /(historia|historico|históric)/, cdu: '93/94' },
+      { pattern: /(filosof|etica|ética|lógica|logica)/, cdu: '1' },
+      { pattern: /(religi|teolog|biblia)/, cdu: '2' },
+      { pattern: /(sociolog|politic|polític|econom|derecho|educaci)/, cdu: '3' },
+      { pattern: /(matemat|fisic|físic|quimic|biolog|ciencia)/, cdu: '5' },
+      { pattern: /(medicin|salud|enfermer)/, cdu: '61' },
+      { pattern: /(ingenier|tecnolog|informat|programaci|programación|comput)/, cdu: '6' },
+      { pattern: /(arte|musica|música|arquitect|fotograf)/, cdu: '7' },
+      { pattern: /(lengua|gramat|gramátic|lingu)/, cdu: '81' },
+      { pattern: /(geograf|viaje|turis)/, cdu: '91' },
+    ];
+
+    const matched = mappings.find((item) => item.pattern.test(text));
+    return matched ? matched.cdu : '0';
+  }
+
+  function getAuthorSignatureCode(authors) {
+    const firstAuthorName = authors?.[0]?.name || '';
+    const normalized = normalizeText(firstAuthorName);
+    if (!normalized) return 'XXX';
+
+    const particles = new Set(['DE', 'DEL', 'LA', 'LAS', 'LOS', 'DA', 'DO', 'DOS', 'DI', 'VAN', 'VON']);
+    const tokens = normalized.split(' ').filter(Boolean);
+    let surname = tokens[tokens.length - 1] || '';
+    for (let idx = tokens.length - 1; idx >= 0; idx -= 1) {
+      if (!particles.has(tokens[idx])) {
+        surname = tokens[idx];
+        break;
+      }
+    }
+
+    return (surname.replace(/[^A-Z0-9]/g, '') + 'XXX').slice(0, 3);
+  }
+
+  function getTitleSignatureCode(title) {
+    const normalized = normalizeText(title);
+    if (!normalized) return 'XXX';
+    const joined = normalized.replace(/\s+/g, '');
+    return (joined + 'XXX').slice(0, 3);
+  }
+
+  function generateCduSignature(container) {
+    const title = container.querySelector('#book-title')?.value.trim() || '';
+    const genre = container.querySelector('#book-genre')?.value.trim() || '';
+    const description = container.querySelector('#book-description')?.value.trim() || '';
+    const cduInput = container.querySelector('#book-cdu');
+    const signatureInput = container.querySelector('#book-signature');
+    const authors = authorSelectorInstance?.getAuthors() || [];
+
+    if (!title) {
+      Toast.warning('Escribe el título antes de generar la signatura');
+      return;
+    }
+
+    if (!authors.length) {
+      Toast.warning('Añade al menos un autor para generar la signatura');
+      return;
+    }
+
+    const cdu = (cduInput?.value.trim() || inferCduFromGenre(genre, description)).toUpperCase();
+    const authorCode = getAuthorSignatureCode(authors);
+    const titleCode = getTitleSignatureCode(title);
+    const signature = `${cdu} ${authorCode} ${titleCode}`.trim();
+
+    if (cduInput) cduInput.value = cdu;
+    if (signatureInput) signatureInput.value = signature;
+    Toast.success('Signatura CDU generada');
+  }
+
   function resolveImportedIsbn(externalBook) {
     if (!externalBook) return null;
 
@@ -554,6 +656,8 @@ const BookForm = (() => {
       tags: tags ? JSON.stringify(tags.split(',').map((t) => t.trim()).filter(Boolean)) : null,
       description: document.getElementById('book-description').value.trim() || null,
       cover_url: document.getElementById('book-cover-url').value.trim() || null,
+      cdu: document.getElementById('book-cdu').value.trim() || null,
+      signature: document.getElementById('book-signature').value.trim() || null,
       location: document.getElementById('book-location').value.trim() || null,
       condition: document.getElementById('book-condition').value || null,
       read_status: document.getElementById('book-read-status').value,

@@ -22,6 +22,8 @@ describe('bookService', () => {
     const created = bookService.create({
       title: 'Libro de prueba',
       language: 'es',
+      cdu: '82',
+      signature: '82 AUT LIB',
       authors: [
         { id: 1, role: 'author', author_order: 1 },
         { id: 2, role: 'translator', author_order: 2 },
@@ -32,6 +34,8 @@ describe('bookService', () => {
     expect(created.id).toBeDefined();
     const loaded = bookService.getById(created.id);
     expect(loaded.title).toBe('Libro de prueba');
+    expect(loaded.cdu).toBe('82');
+    expect(loaded.signature).toBe('82 AUT LIB');
     expect(loaded.bookAuthors.length).toBe(2);
     expect(loaded.bookAuthors[1].role).toBe('translator');
   });
@@ -46,11 +50,15 @@ describe('bookService', () => {
 
     const updated = bookService.update(created.id, {
       title: 'Libro actualizado',
+      cdu: '93/94',
+      signature: '93/94 AUT LIB',
       authors: [{ id: 2, role: 'editor', author_order: 1 }],
       read_status: 'reading',
     });
 
     expect(updated.title).toBe('Libro actualizado');
+    expect(updated.cdu).toBe('93/94');
+    expect(updated.signature).toBe('93/94 AUT LIB');
     expect(updated.read_status).toBe('reading');
 
     const loaded = bookService.getById(created.id);

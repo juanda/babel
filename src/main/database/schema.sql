@@ -29,6 +29,8 @@ CREATE TABLE IF NOT EXISTS books (
     tags TEXT,
     description TEXT,
     cover_url TEXT,
+    cdu TEXT,
+    signature TEXT,
     location TEXT,
     condition TEXT,
     acquisition_date TEXT,

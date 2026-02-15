@@ -38,6 +38,18 @@ describe('validators', () => {
     expect(parsed.cover_url).toBe('file:///tmp/cover.jpg');
   });
 
+  test('bookSchema acepta campos CDU/signatura', () => {
+    const parsed = parseSchema(bookSchema, {
+      title: 'Libro con signatura',
+      language: 'es',
+      cdu: '821.134.2',
+      signature: '821.134.2 GAR CIE',
+    });
+
+    expect(parsed.cdu).toBe('821.134.2');
+    expect(parsed.signature).toBe('821.134.2 GAR CIE');
+  });
+
   test('bookSchema aplica defaults críticos', () => {
     const parsed = parseSchema(bookSchema, {
       title: 'El libro',

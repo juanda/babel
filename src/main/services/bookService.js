@@ -146,12 +146,12 @@ function create(input) {
       .prepare(
         `INSERT INTO books (
           isbn, title, subtitle, publisher, publication_date, edition, language, pages,
-          format, genre, tags, description, cover_url, location, condition,
+          format, genre, tags, description, cover_url, cdu, signature, location, condition,
           acquisition_date, acquisition_source, purchase_price, current_value,
           notes, rating, read_status, favorite, loanable
         ) VALUES (
           @isbn, @title, @subtitle, @publisher, @publication_date, @edition, @language, @pages,
-          @format, @genre, @tags, @description, @cover_url, @location, @condition,
+          @format, @genre, @tags, @description, @cover_url, @cdu, @signature, @location, @condition,
           @acquisition_date, @acquisition_source, @purchase_price, @current_value,
           @notes, @rating, @read_status, @favorite, @loanable
         )`
@@ -195,7 +195,7 @@ function update(id, input) {
           isbn=@isbn, title=@title, subtitle=@subtitle, publisher=@publisher,
           publication_date=@publication_date, edition=@edition, language=@language,
           pages=@pages, format=@format, genre=@genre, tags=@tags, description=@description,
-          cover_url=@cover_url, location=@location, condition=@condition,
+          cover_url=@cover_url, cdu=@cdu, signature=@signature, location=@location, condition=@condition,
           acquisition_date=@acquisition_date, acquisition_source=@acquisition_source,
           purchase_price=@purchase_price, current_value=@current_value, notes=@notes,
           rating=@rating, read_status=@read_status, favorite=@favorite, loanable=@loanable,
