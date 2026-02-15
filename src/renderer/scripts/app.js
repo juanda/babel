@@ -87,8 +87,11 @@
     }
   }
 
-  function renderBooks() {
+  async function renderBooks() {
     const container = viewContainer();
+    const collectionsRes = await window.api.collections.getAll();
+    const collections = collectionsRes.success ? collectionsRes.data : [];
+
     container.innerHTML = `
       <div class="filters-bar">
         <input class="form-input" id="book-filter-search" placeholder="Buscar por título o autor">
@@ -98,6 +101,22 @@
           <option value="reading">Leyendo</option>
           <option value="completed">Leídos</option>
         </select>
+        <select class="form-select" id="book-filter-collection">
+          <option value="">Todas las colecciones</option>
+          ${collections.map((c) => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('')}
+        </select>
+        <label class="form-checkbox">
+          <input type="checkbox" id="book-filter-favorite">
+          Favoritos
+        </label>
+        <label class="form-checkbox">
+          <input type="checkbox" id="book-filter-loanable">
+          Disponibles préstamo
+        </label>
+        <label class="form-checkbox">
+          <input type="checkbox" id="book-filter-label-not-printed">
+          Tejuelo no impreso
+        </label>
         <button class="btn btn-secondary" id="book-filter-apply">Filtrar</button>
       </div>
       <div id="books-content" class="mt-md"></div>
@@ -108,6 +127,10 @@
       BookList.render(content, {
         search: document.getElementById('book-filter-search').value.trim() || undefined,
         read_status: document.getElementById('book-filter-status').value || undefined,
+        collection_id: document.getElementById('book-filter-collection').value || undefined,
+        favorite: document.getElementById('book-filter-favorite').checked ? 1 : undefined,
+        loanable: document.getElementById('book-filter-loanable').checked ? 1 : undefined,
+        label_printed: document.getElementById('book-filter-label-not-printed').checked ? 0 : undefined,
       });
     };
 

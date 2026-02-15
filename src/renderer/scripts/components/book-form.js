@@ -240,19 +240,19 @@ const BookForm = (() => {
             <textarea class="form-textarea" id="book-notes" rows="2">${book?.notes || ''}</textarea>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-checkbox">
-                <input type="checkbox" id="book-favorite" ${book?.favorite ? 'checked' : ''}>
-                Favorito
-              </label>
-            </div>
-            <div class="form-group">
-              <label class="form-checkbox">
-                <input type="checkbox" id="book-loanable" ${book?.loanable !== 0 ? 'checked' : ''}>
-                Disponible para préstamo
-              </label>
-            </div>
+          <div class="form-checkbox-grid">
+            <label class="form-checkbox form-checkbox-card">
+              <input type="checkbox" id="book-favorite" ${book?.favorite ? 'checked' : ''}>
+              Favorito
+            </label>
+            <label class="form-checkbox form-checkbox-card">
+              <input type="checkbox" id="book-loanable" ${book?.loanable !== 0 ? 'checked' : ''}>
+              Disponible para préstamo
+            </label>
+            <label class="form-checkbox form-checkbox-card">
+              <input type="checkbox" id="book-label-printed" ${book?.label_printed ? 'checked' : ''}>
+              Tejuelo impreso
+            </label>
           </div>
 
           <div class="form-group">
@@ -666,6 +666,7 @@ const BookForm = (() => {
       purchase_price: parseFloat(document.getElementById('book-price').value) || null,
       favorite: document.getElementById('book-favorite').checked ? 1 : 0,
       loanable: document.getElementById('book-loanable').checked ? 1 : 0,
+      label_printed: document.getElementById('book-label-printed').checked ? 1 : 0,
       notes: document.getElementById('book-notes').value.trim() || null,
       authors: authorSelectorInstance?.getAuthors() || [],
     };

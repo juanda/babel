@@ -54,6 +54,23 @@ function buildFilters(filters = {}) {
     where.push('b.favorite = @favorite');
     params.favorite = filters.favorite ? 1 : 0;
   }
+  if (filters.loanable !== undefined && filters.loanable !== null) {
+    where.push('b.loanable = @loanable');
+    params.loanable = filters.loanable ? 1 : 0;
+  }
+  if (filters.label_printed !== undefined && filters.label_printed !== null) {
+    where.push('b.label_printed = @label_printed');
+    params.label_printed = filters.label_printed ? 1 : 0;
+  }
+  if (filters.collection_id !== undefined && filters.collection_id !== null && filters.collection_id !== '') {
+    where.push(
+      `EXISTS (
+        SELECT 1 FROM book_collections bc
+        WHERE bc.book_id = b.id AND bc.collection_id = @collection_id
+      )`
+    );
+    params.collection_id = Number(filters.collection_id);
+  }
 
   return {
     whereClause: where.length ? `WHERE ${where.join(' AND ')}` : '',
@@ -148,12 +165,12 @@ function create(input) {
           isbn, title, subtitle, publisher, publication_date, edition, language, pages,
           format, genre, tags, description, cover_url, cdu, signature, location, condition,
           acquisition_date, acquisition_source, purchase_price, current_value,
-          notes, rating, read_status, favorite, loanable
+          notes, rating, read_status, favorite, loanable, label_printed
         ) VALUES (
           @isbn, @title, @subtitle, @publisher, @publication_date, @edition, @language, @pages,
           @format, @genre, @tags, @description, @cover_url, @cdu, @signature, @location, @condition,
           @acquisition_date, @acquisition_source, @purchase_price, @current_value,
-          @notes, @rating, @read_status, @favorite, @loanable
+          @notes, @rating, @read_status, @favorite, @loanable, @label_printed
         )`
       )
       .run(bookData);
@@ -178,6 +195,7 @@ function update(id, input) {
     ...input,
     favorite: input.favorite ?? existing.favorite,
     loanable: input.loanable ?? existing.loanable,
+    label_printed: input.label_printed ?? existing.label_printed,
     authors: input.authors ?? existing.bookAuthors?.map((a) => ({
       id: a.author_id,
       role: a.role,
@@ -199,6 +217,7 @@ function update(id, input) {
           acquisition_date=@acquisition_date, acquisition_source=@acquisition_source,
           purchase_price=@purchase_price, current_value=@current_value, notes=@notes,
           rating=@rating, read_status=@read_status, favorite=@favorite, loanable=@loanable,
+          label_printed=@label_printed,
           updated_at=CURRENT_TIMESTAMP
         WHERE id=@id`
       )

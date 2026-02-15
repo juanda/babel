@@ -41,6 +41,7 @@ function initialize() {
   // Migraciones incrementales para instalaciones existentes
   ensureColumn('books', 'cdu', 'TEXT');
   ensureColumn('books', 'signature', 'TEXT');
+  ensureColumn('books', 'label_printed', 'BOOLEAN DEFAULT 0');
 
   console.log(`[DB] Base de datos inicializada en: ${dbPath}`);
   return db;

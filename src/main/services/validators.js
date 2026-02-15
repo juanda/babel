@@ -61,6 +61,7 @@ const bookSchema = z.object({
   read_status: z.enum(['unread', 'reading', 'completed']).default('unread'),
   favorite: z.union([z.boolean(), z.number()]).optional().transform((v) => (v ? 1 : 0)),
   loanable: z.union([z.boolean(), z.number()]).optional().transform((v) => (v === undefined ? 1 : v ? 1 : 0)),
+  label_printed: z.union([z.boolean(), z.number()]).optional().transform((v) => (v === undefined ? 0 : v ? 1 : 0)),
   authors: z.array(bookAuthorSchema).optional().default([]),
 });
 

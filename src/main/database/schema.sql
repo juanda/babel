@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS books (
     read_status TEXT DEFAULT 'unread',
     favorite BOOLEAN DEFAULT 0,
     loanable BOOLEAN DEFAULT 1,
+    label_printed BOOLEAN DEFAULT 0,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );

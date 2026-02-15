@@ -8,6 +8,20 @@ const BookList = (() => {
   let currentFilters = {};
   let viewMode = Store.get('viewMode') || 'grid';
 
+  function hasActiveFilters(filters = {}) {
+    return Object.values(filters).some((value) => value !== undefined && value !== null && value !== '');
+  }
+
+  function getEmptyStateConfig(filters = {}) {
+    const filteredEmpty = hasActiveFilters(filters);
+    return {
+      message: filteredEmpty
+        ? 'No se encontraron libros con los filtros actuales'
+        : 'No hay libros en tu biblioteca',
+      showAddButton: !filteredEmpty,
+    };
+  }
+
   async function render(container, filters = {}) {
     currentFilters = filters;
     currentPage = 1;
@@ -54,11 +68,12 @@ const BookList = (() => {
     `;
 
     if (currentBooks.length === 0) {
+      const emptyState = getEmptyStateConfig(currentFilters);
       html += `
         <div class="empty-state">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
-          <p>No hay libros en tu biblioteca</p>
-          <button class="btn btn-primary" data-action="go-new-book">Agregar tu primer libro</button>
+          <p>${emptyState.message}</p>
+          ${emptyState.showAddButton ? '<button class="btn btn-primary" data-action="go-new-book">Agregar tu primer libro</button>' : ''}
         </div>
       `;
     } else if (viewMode === 'grid') {
@@ -249,5 +264,9 @@ const BookList = (() => {
     }
   }
 
-  return { render, goToPage, setViewMode, deleteBook };
+  return { render, goToPage, setViewMode, deleteBook, __test: { hasActiveFilters, getEmptyStateConfig } };
 })();
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = BookList;
+}

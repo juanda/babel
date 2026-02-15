@@ -124,6 +124,27 @@
   cursor: pointer;
 }
 
+.form-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.form-checkbox-card {
+  border: 2px solid var(--color-border);
+  padding: var(--spacing-sm) var(--spacing-md);
+  min-height: 44px;
+  width: 100%;
+  justify-content: flex-start;
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.form-checkbox-card:hover {
+  transform: translate(-1px, -1px);
+}
+
 .form-inline {
   display: flex;
   align-items: flex-end;
@@ -137,6 +158,10 @@
 @media (max-width: 900px) {
   .form-row,
   .form-row-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .form-checkbox-grid {
     grid-template-columns: 1fr;
   }
 

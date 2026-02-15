@@ -59,6 +59,7 @@ describe('validators', () => {
     expect(parsed.read_status).toBe('unread');
     expect(parsed.favorite).toBe(0);
     expect(parsed.loanable).toBe(1);
+    expect(parsed.label_printed).toBe(0);
     expect(Array.isArray(parsed.authors)).toBe(true);
   });
 
