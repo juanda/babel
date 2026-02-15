@@ -24,10 +24,60 @@ const BookForm = (() => {
         <form id="book-form" class="mt-lg">
           <div class="detail-card mb-lg">
             <h3>Buscar en internet</h3>
-            <p class="text-muted text-sm">Busca por título, autor o ISBN e importa datos automáticamente.</p>
+            <p class="text-muted text-sm">Puedes buscar de forma general o por campo específico e importar datos automáticamente.</p>
+            <div class="form-row mt-md">
+              <div class="form-group">
+                <label class="form-label">Modo de búsqueda</label>
+                <select class="form-select" id="external-search-mode">
+                  <option value="general" selected>General</option>
+                  <option value="isbn">ISBN exacto</option>
+                  <option value="title">Título</option>
+                  <option value="author">Autor</option>
+                  <option value="publisher">Editorial</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Idioma (filtro)</label>
+                <select class="form-select" id="external-search-language">
+                  <option value="">Cualquiera</option>
+                  <option value="es">Español</option>
+                  <option value="en">Inglés</option>
+                  <option value="fr">Francés</option>
+                  <option value="pt">Portugués</option>
+                  <option value="de">Alemán</option>
+                  <option value="it">Italiano</option>
+                </select>
+              </div>
+            </div>
             <div class="form-inline mt-md">
               <input type="text" class="form-input" id="external-book-query" placeholder="Ej: Cien años de soledad o 9788497592208">
               <button type="button" class="btn btn-secondary" id="external-book-search-btn">Buscar</button>
+            </div>
+            <div class="form-row mt-md">
+              <div class="form-group">
+                <label class="form-label">Autor (filtro)</label>
+                <input type="text" class="form-input" id="external-filter-author" placeholder="Opcional">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Editorial (filtro)</label>
+                <input type="text" class="form-input" id="external-filter-publisher" placeholder="Opcional">
+              </div>
+            </div>
+            <div class="form-row mt-md">
+              <div class="form-group">
+                <label class="form-label">Año (filtro)</label>
+                <input type="number" class="form-input" id="external-filter-year" min="1000" max="2100" placeholder="Ej: 2015">
+              </div>
+              <div class="form-group" style="display:flex;align-items:flex-end;gap:16px;">
+                <label class="form-checkbox">
+                  <input type="checkbox" id="external-search-exact">
+                  Modo exacto
+                </label>
+                <label class="form-checkbox">
+                  <input type="checkbox" id="external-include-variants">
+                  Mostrar variantes/ediciones
+                </label>
+              </div>
             </div>
             <div id="external-book-results" class="mt-md"></div>
           </div>
@@ -232,14 +282,20 @@ const BookForm = (() => {
     const queryInput = container.querySelector('#external-book-query');
     const resultsEl = container.querySelector('#external-book-results');
     const query = queryInput.value.trim();
+    const options = getExternalSearchOptions(container);
 
-    if (query.length < 2) {
-      Toast.warning('Escribe al menos 2 caracteres para buscar');
+    const minLength = options.mode === 'isbn' ? 3 : 2;
+    if (query.length < minLength) {
+      Toast.warning(
+        options.mode === 'isbn'
+          ? 'Escribe al menos 3 caracteres para ISBN'
+          : 'Escribe al menos 2 caracteres para buscar'
+      );
       return;
     }
 
     resultsEl.innerHTML = '<span class="text-muted text-sm">Buscando...</span>';
-    const result = await window.api.books.searchExternal(query);
+    const result = await window.api.books.searchExternal(query, options);
     if (!result.success) {
       resultsEl.innerHTML = '<span class="text-muted text-sm">No se pudo consultar catálogos externos.</span>';
       Toast.error(result.error || 'Error en búsqueda externa');
@@ -289,6 +345,26 @@ const BookForm = (() => {
         await applyExternalBook(container, selected);
       });
     });
+  }
+
+  function getExternalSearchOptions(container) {
+    const mode = container.querySelector('#external-search-mode')?.value || 'general';
+    const language = container.querySelector('#external-search-language')?.value || '';
+    const author = container.querySelector('#external-filter-author')?.value.trim() || '';
+    const publisher = container.querySelector('#external-filter-publisher')?.value.trim() || '';
+    const year = container.querySelector('#external-filter-year')?.value.trim() || '';
+    const exact = container.querySelector('#external-search-exact')?.checked || false;
+    const includeVariants = container.querySelector('#external-include-variants')?.checked || false;
+
+    return {
+      mode,
+      language: language || undefined,
+      author: author || undefined,
+      publisher: publisher || undefined,
+      year: year || undefined,
+      exact,
+      includeVariants,
+    };
   }
 
   async function applyExternalBook(container, externalBook) {

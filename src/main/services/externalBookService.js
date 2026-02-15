@@ -21,6 +21,14 @@ function normalizeLanguage(lang) {
   return 'other';
 }
 
+function normalizeText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+}
+
 function toSecureImageUrl(url) {
   if (!url) return null;
   const raw = String(url).trim();
@@ -30,11 +38,13 @@ function toSecureImageUrl(url) {
   return raw;
 }
 
+function cleanIsbn(value) {
+  return String(value || '').replace(/[^0-9Xx]/g, '').toUpperCase();
+}
+
 function pickIsbn(candidates = []) {
   if (!Array.isArray(candidates) || candidates.length === 0) return null;
-  const cleaned = candidates
-    .map((v) => String(v || '').replace(/[^0-9Xx]/g, ''))
-    .filter(Boolean);
+  const cleaned = candidates.map(cleanIsbn).filter(Boolean);
 
   const isbn13 = cleaned.find((i) => i.length === 13);
   if (isbn13) return isbn13;
@@ -43,13 +53,21 @@ function pickIsbn(candidates = []) {
   return isbn10 || cleaned[0] || null;
 }
 
+function quoteTerm(value) {
+  const text = String(value || '').trim();
+  if (!text) return '';
+  return /\s/.test(text) ? `"${text}"` : text;
+}
+
 async function fetchJson(url) {
+  console.log(`[externalBookService] GET ${url}`);
   const res = await fetch(url, {
     headers: {
       Accept: 'application/json',
       'User-Agent': 'MiBiblioteca/1.0 (desktop app)',
     },
   });
+  console.log(`[externalBookService] ${res.status} ${res.statusText} <- ${url}`);
 
   if (!res.ok) {
     throw new Error(`Error consultando catálogo externo (${res.status})`);
@@ -58,8 +76,86 @@ async function fetchJson(url) {
   return res.json();
 }
 
-async function searchOpenLibrary(query, limit = 8) {
-  const url = `${OPEN_LIBRARY_SEARCH_BASE}?q=${encodeURIComponent(query)}&limit=${limit}`;
+function buildOpenLibraryUrl(query, options = {}, limit = 100) {
+  const mode = options.mode || 'general';
+  const q = String(query || '').trim();
+  const params = new URLSearchParams({
+    limit: String(limit),
+  });
+
+  if (mode === 'isbn') {
+    const isbn = cleanIsbn(q);
+    if (isbn) {
+      params.set('isbn', isbn);
+    } else {
+      params.set('q', q);
+    }
+  } else if (mode === 'title') {
+    params.set('title', q);
+  } else if (mode === 'author') {
+    params.set('author', q);
+  } else {
+    params.set('q', q);
+  }
+
+  if (mode !== 'author' && options.author) {
+    params.set('author', String(options.author).trim());
+  }
+
+  const qParts = [];
+  if (mode === 'publisher') {
+    qParts.push(`publisher:${quoteTerm(q)}`);
+  }
+  if (mode !== 'publisher' && options.publisher) {
+    qParts.push(`publisher:${quoteTerm(options.publisher)}`);
+  }
+  if (options.year) {
+    qParts.push(`first_publish_year:${String(options.year).trim()}`);
+  }
+  if (options.language) {
+    qParts.push(`language:${String(options.language).trim()}`);
+  }
+
+  if (qParts.length > 0) {
+    const baseQ = params.get('q');
+    params.set('q', [baseQ, ...qParts].filter(Boolean).join(' '));
+  }
+
+  return `${OPEN_LIBRARY_SEARCH_BASE}?${params.toString()}`;
+}
+
+function buildGoogleQuery(query, options = {}) {
+  const mode = options.mode || 'general';
+  const q = String(query || '').trim();
+  const parts = [];
+
+  if (mode === 'isbn') {
+    parts.push(`isbn:${cleanIsbn(q) || quoteTerm(q)}`);
+  } else if (mode === 'title') {
+    parts.push(`intitle:${quoteTerm(q)}`);
+  } else if (mode === 'author') {
+    parts.push(`inauthor:${quoteTerm(q)}`);
+  } else if (mode === 'publisher') {
+    parts.push(`inpublisher:${quoteTerm(q)}`);
+  } else {
+    parts.push(q);
+  }
+
+  if (mode !== 'author' && options.author) {
+    parts.push(`inauthor:${quoteTerm(options.author)}`);
+  }
+  if (mode !== 'publisher' && options.publisher) {
+    parts.push(`inpublisher:${quoteTerm(options.publisher)}`);
+  }
+  if (options.year) {
+    parts.push(String(options.year).trim());
+  }
+
+  return parts.filter(Boolean).join(' ');
+}
+
+async function searchOpenLibrary(query, options = {}, limit = 100) {
+  const url = buildOpenLibraryUrl(query, options, limit);
   const payload = await fetchJson(url);
   const docs = Array.isArray(payload?.docs) ? payload.docs : [];
 
@@ -85,14 +181,19 @@ async function searchOpenLibrary(query, limit = 8) {
   }).filter((item) => item.title);
 }
 
-async function searchGoogleBooks(query, limit = 8) {
+async function searchGoogleBooks(query, options = {}, limit = 40) {
   const key = process.env.GOOGLE_BOOKS_API_KEY;
   const params = new URLSearchParams({
-    q: query,
-    maxResults: String(limit),
+    q: buildGoogleQuery(query, options),
+    maxResults: String(Math.min(limit, 40)),
     printType: 'books',
     projection: 'lite',
   });
+
+  if (options.language && options.language !== 'other') {
+    params.set('langRestrict', options.language);
+  }
+
   if (key) {
     params.set('key', key);
   }
@@ -141,15 +242,68 @@ function dedupeResults(items) {
   return out;
 }
 
-async function searchBooks(query) {
+function postFilterResults(items, query, options = {}) {
+  const mode = options.mode || 'general';
   const q = String(query || '').trim();
-  if (q.length < 2) {
+  const qNorm = normalizeText(q);
+
+  return items.filter((item) => {
+    if (options.year) {
+      const year = String(options.year).trim();
+      if (!(item.publication_date || '').startsWith(year)) {
+        return false;
+      }
+    }
+
+    if (options.language) {
+      if (item.language !== options.language) {
+        return false;
+      }
+    }
+
+    if (options.publisher) {
+      const pubNorm = normalizeText(options.publisher);
+      if (!normalizeText(item.publisher).includes(pubNorm)) {
+        return false;
+      }
+    }
+
+    if (!options.exact) {
+      return true;
+    }
+
+    if (mode === 'isbn') {
+      return cleanIsbn(item.isbn) === cleanIsbn(q);
+    }
+
+    if (mode === 'title') {
+      return normalizeText(item.title) === qNorm;
+    }
+
+    if (mode === 'author') {
+      return (item.authors || []).some((name) => normalizeText(name) === qNorm);
+    }
+
+    if (mode === 'publisher') {
+      return normalizeText(item.publisher) === qNorm;
+    }
+
+    return normalizeText(item.title).includes(qNorm) || cleanIsbn(item.isbn) === cleanIsbn(q);
+  });
+}
+
+async function searchBooks(query, options = {}) {
+  const q = String(query || '').trim();
+  const mode = options.mode || 'general';
+  const minLength = mode === 'isbn' ? 3 : 2;
+
+  if (q.length < minLength) {
     return [];
   }
 
   const settled = await Promise.allSettled([
-    searchOpenLibrary(q, 8),
-    searchGoogleBooks(q, 8),
+    searchOpenLibrary(q, options, 100),
+    searchGoogleBooks(q, options, 40),
   ]);
 
   const merged = [];
@@ -159,7 +313,12 @@ async function searchBooks(query) {
     }
   }
 
-  return dedupeResults(merged).slice(0, 12);
+  const filtered = postFilterResults(merged, q, options);
+  if (options.includeVariants) {
+    return filtered;
+  }
+
+  return dedupeResults(filtered);
 }
 
 module.exports = {

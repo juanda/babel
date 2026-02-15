@@ -37,9 +37,9 @@ function register(ipcMain) {
     }
   });
   ipcMain.handle('books:search', async (_e, query) => ok(bookService.search(query)));
-  ipcMain.handle('books:searchExternal', async (_e, query) => {
+  ipcMain.handle('books:searchExternal', async (_e, query, options) => {
     try {
-      return ok(await externalBookService.searchBooks(query));
+      return ok(await externalBookService.searchBooks(query, options || {}));
     } catch (error) {
       return fail(error);
     }

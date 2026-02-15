@@ -9,7 +9,7 @@ contextBridge.exposeInMainWorld('api', {
     update: (id, data) => ipcRenderer.invoke('books:update', id, data),
     delete: (id) => ipcRenderer.invoke('books:delete', id),
     search: (query) => ipcRenderer.invoke('books:search', query),
-    searchExternal: (query) => ipcRenderer.invoke('books:searchExternal', query),
+    searchExternal: (query, options) => ipcRenderer.invoke('books:searchExternal', query, options),
     uploadCover: (filePath) => ipcRenderer.invoke('books:uploadCover', filePath),
   },
 
